@@ -1,0 +1,65 @@
+# ============================================================
+# A3E-DNS — Dask parallel dataset processing configuration
+# Thesis §6.13 (§6.13.1–§6.13.8)
+# ============================================================
+# The 32 GB dataset is preprocessed in ~2 hours on the testbed of
+# §6.11. This figure is a property of the testbed and the pipeline
+# configuration, not a general throughput result.
+
+dask_pipeline:
+  # --- Framework (§6.13.1) ---
+  framework: dask
+  scheduler: distributed
+  n_workers: null                        # auto from testbed cores
+  threads_per_worker: 4
+  processes: true
+
+  # --- Four stages (§6.13.2–§6.13.6) ---
+  stages:
+    # Stage 1 — Distributed loading (§6.13.3)
+    distributed_loading:
+      source: "Gen-C-DDD-2022"
+      size_gb: 32
+      chunk_size_mb: 256
+      partitioning: automatic
+      memory_bound: true
+
+    # Stage 2 — Feature engineering & normalization (§6.13.4)
+    feature_engineering:
+      protocols:
+        - doh
+        - dot
+        - doq
+      features:
+        - protocol_attrs
+        - statistical_descriptors
+        - flow_characteristics
+      normalization: z_score                # zero mean, unit variance
+      numeric_only: true
+
+    # Stage 3 — Ground-truth label integration (§6.13.5)
+    label_integration:
+      source: original_dataset_annotations
+      label_classes: null                  # set per dataset variant
+
+    # Stage 4 — Train / validation / test prep (§6.13.6)
+    split:
+      train_pct: 0.70
+      val_pct: 0.15
+      test_pct: 0.15
+      stratify_by: class
+      preserve_temporal_order: true        # avoid overlap with training period
+
+  # --- Performance characteristics (§6.13.7) ---
+  performance:
+    preprocessing_time_hours: 2.0
+    no_memory_spikes: true
+    iterative_regeneration: enabled
+
+  # --- Microbenchmark (§6.13.8) ---
+  microbenchmark:
+    per_component: true
+    metrics:
+      - execution_latency
+      - memory_usage
+      - scalability
