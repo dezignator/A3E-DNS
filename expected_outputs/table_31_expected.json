@@ -1,0 +1,55 @@
+{
+  "table": 31,
+  "title": "Attack Injection Framework and Detection Pipeline",
+  "artifact_version": "1.0.0",
+  "thesis": {
+    "chapter": "Chapter 6",
+    "framework": "A3E-DNS",
+    "artifact_version": "1.0.0"
+  },
+  "n_phases": 6,
+  "rows": [
+    {
+      "phase": "Recon",
+      "command": "dnsenum -dnsserver 8.8.8.8 -enum",
+      "observed_behavior": "~45 DNS q/s",
+      "detection": "FL model, p = 0.82",
+      "mitigation": "rate-limit -src-ip -queries 10/s"
+    },
+    {
+      "phase": "Traffic Morphing",
+      "command": "scapy-doh-morph -target resolver -shape gaussian",
+      "observed_behavior": "μ = 900 B, σ = 150 B",
+      "detection": "AEE dynamic threshold",
+      "mitigation": "aee-rekey -trigger anomaly -strength high"
+    },
+    {
+      "phase": "Encrypted Tunnel",
+      "command": "iodine -f -P password 1.2.3.4 test.tunnel",
+      "observed_behavior": "60 B @ 100 ms",
+      "detection": "QHE: χ² = 45.6 > χ²_crit(α = 0.01)",
+      "mitigation": "quarantine -flow -duration 5m -analyze"
+    },
+    {
+      "phase": "Timing Attack",
+      "command": "time-doh-attack -resolver target -samples 1000",
+      "observed_behavior": "Response-time shift",
+      "detection": "DP noise t' = t + N(0, 0.5)",
+      "mitigation": "dp-enhance -sigma 0.5 -preserve-utility"
+    },
+    {
+      "phase": "Model Poisoning",
+      "command": "fl-poison -clients 5 -epsilon 0.3 -epochs 10",
+      "observed_behavior": "δ = 0.15 adversarial bias",
+      "detection": "MAD filter, MAD > 2.5σ",
+      "mitigation": "fl-verify -median-filter -trim 0.1"
+    },
+    {
+      "phase": "QUIC Exploit",
+      "command": "quick-interop -version-spoof -force v1_draft",
+      "observed_behavior": "Version mismatch",
+      "detection": "Strict version binding",
+      "mitigation": "protocol-validate -strict -rollback-on-fail"
+    }
+  ]
+}
