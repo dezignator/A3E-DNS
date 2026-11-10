@@ -1,0 +1,473 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dezignator/A3E-DNS/configs/schema.json",
+  "title": "A3E-DNS configuration schema",
+  "description": "JSON Schema for the 9 YAML configuration files in configs/. Each YAML is validated against one of the nine config definitions in $defs. A single YAML must have exactly one top-level key among the nine known keys.",
+  "type": "object",
+  "additionalProperties": false,
+  "oneOf": [
+    { "required": ["aee"] },
+    { "required": ["qhe"] },
+    { "required": ["federated_learning"] },
+    { "required": ["threat_intel"] },
+    { "required": ["testbed"] },
+    { "required": ["p4_pipeline"] },
+    { "required": ["dask_pipeline"] },
+    { "required": ["anomaly_detector"] },
+    { "required": ["amps"] }
+  ],
+  "properties": {
+    "aee":                { "$ref": "#/$defs/aee" },
+    "qhe":                { "$ref": "#/$defs/qhe" },
+    "federated_learning": { "$ref": "#/$defs/federated_learning" },
+    "threat_intel":       { "$ref": "#/$defs/threat_intel" },
+    "testbed":            { "$ref": "#/$defs/testbed" },
+    "p4_pipeline":        { "$ref": "#/$defs/p4_pipeline" },
+    "dask_pipeline":      { "$ref": "#/$defs/dask_pipeline" },
+    "anomaly_detector":   { "$ref": "#/$defs/anomaly_detector" },
+    "amps":               { "$ref": "#/$defs/amps" }
+  },
+  "$defs": {
+    "aee": {
+      "type": "object",
+      "required": ["se3_dim", "key_bits", "state_vector_dim", "sigma_min", "sigma_max", "entropy_source", "neural_controller"],
+      "additionalProperties": true,
+      "properties": {
+        "se3_dim":            { "type": "integer", "minimum": 1 },
+        "key_bits":           { "type": "integer", "const": 256 },
+        "state_vector_dim":   { "type": "integer", "minimum": 1 },
+        "rotation_cadence":   { "type": "string" },
+        "sigma_min":          { "type": "number", "exclusiveMinimum": 0 },
+        "sigma_max":          { "type": "number", "exclusiveMinimum": 0 },
+        "sigma_function":     { "type": "string" },
+        "entropy_source":     { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "entropy_mix":        { "type": "string" },
+        "entropy_threshold":  { "type": "number", "minimum": 0, "maximum": 1 },
+        "key_rotation_seconds": { "type": "integer", "minimum": 1 },
+        "neural_controller":  {
+          "type": "object",
+          "required": ["hidden_layers", "neurons_per_layer", "input_window_packets"],
+          "properties": {
+            "hidden_layers":       { "type": "integer", "minimum": 1 },
+            "neurons_per_layer":   { "type": "integer", "minimum": 1 },
+            "input_window_packets":{ "type": "integer", "minimum": 1 },
+            "features":            { "type": "array", "items": { "type": "string" } },
+            "training":            { "type": "string" },
+            "inference_budget_us": { "type": "number", "minimum": 0 }
+          }
+        },
+        "performance_impact": {
+          "type": "object",
+          "properties": {
+            "latency_ms":         { "type": "number", "minimum": 0 },
+            "security_gain_pct":  { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "failover": {
+          "type": "object",
+          "properties": {
+            "command": { "type": "string" },
+            "scheme":  { "type": "string" }
+          }
+        }
+      }
+    },
+    "qhe": {
+      "type": "object",
+      "required": ["scheme", "n", "q", "ntt", "avx512_slots", "ziggurat"],
+      "additionalProperties": true,
+      "properties": {
+        "scheme":           { "type": "string", "const": "ring_lwe" },
+        "ring":             { "type": "string" },
+        "n":                { "type": "integer", "enum": [256, 512, 1024] },
+        "q":                { "type": "integer", "enum": [4096, 8192, 16384, 3329, 65537] },
+        "plaintext_bits":   { "type": "integer", "minimum": 1 },
+        "error_distribution": { "type": "string" },
+        "ntt":              { "type": "boolean" },
+        "ntt_implementation": { "type": "string" },
+        "avx512_slots":     { "type": "integer", "minimum": 1 },
+        "ziggurat":         { "type": "boolean" },
+        "ziggurat_table_speedup_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "selective_ops":    { "type": "boolean" },
+        "homomorphic_ops":  {
+          "type": "object",
+          "properties": {
+            "additive":               { "type": "boolean" },
+            "multiplicative":         { "type": "boolean" },
+            "multiplicative_depth_max": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "op_reduction_factor": { "type": "number", "minimum": 1 },
+        "cuda": {
+          "type": "object",
+          "properties": {
+            "enabled":       { "type": "boolean" },
+            "device":        { "type": "string" },
+            "cuda_cores":    { "type": "integer", "minimum": 1 },
+            "memory_gb":     { "type": "number", "minimum": 1 },
+            "tops":          { "type": "number", "minimum": 0 },
+            "kernels":       { "type": "array", "items": { "type": "string" } },
+            "tensor_cores":  { "type": "boolean" },
+            "mixed_precision": { "type": "boolean" }
+          }
+        },
+        "compression_ratio": { "type": "number", "minimum": 1 },
+        "pipeline_depth":    { "type": "integer", "minimum": 1 },
+        "cpu_cores":         { "type": "integer", "minimum": 1 },
+        "performance_impact": {
+          "type": "object",
+          "properties": {
+            "cpu_utilization_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+            "memory_mb":           { "type": "number", "minimum": 0 }
+          }
+        },
+        "failover": {
+          "type": "object",
+          "properties": {
+            "command": { "type": "string" },
+            "level":   { "type": "integer", "minimum": 1 },
+            "mode":    { "type": "string" }
+          }
+        }
+      }
+    },
+    "federated_learning": {
+      "type": "object",
+      "required": ["transformer", "dp_sgd", "aggregation", "adversarial_training"],
+      "additionalProperties": true,
+      "properties": {
+        "transformer": {
+          "type": "object",
+          "required": ["layers", "heads", "attention_window"],
+          "properties": {
+            "layers":            { "type": "integer", "minimum": 1 },
+            "heads":             { "type": "integer", "minimum": 1 },
+            "attention_window":  { "type": "integer", "minimum": 1 },
+            "attention_type":    { "type": "string" },
+            "temporal_decay":    { "type": "string" },
+            "embedding_dim":     { "type": "integer", "minimum": 1 },
+            "ffn_dim":           { "type": "integer", "minimum": 1 },
+            "dropout":           { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "dp_sgd": {
+          "type": "object",
+          "required": ["enabled", "mechanism", "epsilon"],
+          "properties": {
+            "enabled":              { "type": "boolean" },
+            "mechanism":            { "type": "string" },
+            "epsilon":              { "type": "number", "exclusiveMinimum": 0 },
+            "target_epsilon":       { "type": "number", "exclusiveMinimum": 0 },
+            "delta":                { "type": "number", "exclusiveMinimum": 0 },
+            "clipping":             { "type": "string" },
+            "clipping_norm":        { "type": "number", "exclusiveMinimum": 0 },
+            "noise_multiplier":     { "type": ["number", "string"] },
+            "accountant":           { "type": "string" }
+          }
+        },
+        "aggregation": {
+          "type": "object",
+          "required": ["method"],
+          "properties": {
+            "method":            { "type": "string", "enum": ["geometric_median", "trimmed_mean", "median", "mean"] },
+            "clipping_function": { "type": "string" },
+            "clipping_norm_C":   { "type": ["number", "null"] },
+            "cross_check_topological": { "type": "boolean" },
+            "byzantine_tolerance": {
+              "type": "object",
+              "properties": {
+                "max_fraction":        { "type": "number", "minimum": 0, "maximum": 1 },
+                "isolation_threshold": { "type": "number", "exclusiveMinimum": 0 }
+              }
+            }
+          }
+        },
+        "adversarial_training": {
+          "type": "object",
+          "properties": {
+            "enabled":      { "type": "boolean" },
+            "method":       { "type": "string" },
+            "l_inf_epsilon":{ "type": "number", "minimum": 0 },
+            "pgd_steps":    { "type": "integer", "minimum": 1 },
+            "kl_regulariser": { "type": "boolean" }
+          }
+        },
+        "cross_check": {
+          "type": "object",
+          "properties": {
+            "enabled":               { "type": "boolean" },
+            "detector":              { "type": "string" },
+            "disagreement_threshold":{ "type": ["number", "null"] }
+          }
+        },
+        "performance": {
+          "type": "object",
+          "properties": {
+            "inference_latency_ms":    { "type": "number", "minimum": 0 },
+            "convergence_epochs":      { "type": "integer", "minimum": 1 },
+            "bandwidth_per_round_mb":  { "type": "number", "minimum": 0 },
+            "rounds":                  { "type": "integer", "minimum": 1 },
+            "clients":                 { "type": "integer", "minimum": 1 }
+          }
+        },
+        "failover": {
+          "type": "object",
+          "properties": {
+            "command":        { "type": "string" },
+            "threshold_sigma":{ "type": "number", "exclusiveMinimum": 0 }
+          }
+        }
+      }
+    },
+    "threat_intel": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "cert_alerts": {
+          "type": "object",
+          "properties": {
+            "enabled":             { "type": "boolean" },
+            "format":              { "type": "string" },
+            "stix_version":        { "type": "string" },
+            "taxii_version":       { "type": "string" },
+            "mode":                { "type": "string" },
+            "ingestion_frequency": { "type": "string" },
+            "processing_pipeline": { "type": "string" },
+            "action_generated":    { "type": "string" },
+            "rules_per_minute":    { "type": "integer", "minimum": 1 },
+            "effectiveness_pct":   { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "honeypot": {
+          "type": "object",
+          "properties": {
+            "enabled":             { "type": "boolean" },
+            "format":              { "type": "string" },
+            "interval":            { "type": "string" },
+            "processing_pipeline": { "type": "string" },
+            "correlation":         { "type": "string" },
+            "action_generated":    { "type": "string" },
+            "effectiveness_pct":   { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "darknet": {
+          "type": "object",
+          "properties": {
+            "enabled":             { "type": "boolean" },
+            "format":              { "type": "string" },
+            "interval":            { "type": "string" },
+            "processing_pipeline": { "type": "string" },
+            "action_generated":    { "type": "string" },
+            "effectiveness_pct":   { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "vendor_feeds": {
+          "type": "object",
+          "properties": {
+            "enabled":             { "type": "boolean" },
+            "formats":             { "type": "array", "items": { "type": "string" } },
+            "interval":            { "type": "string" },
+            "processing_pipeline": { "type": "string" },
+            "weighting":           { "type": "string" },
+            "deduplication":       { "type": "boolean" },
+            "action_generated":    { "type": "string" },
+            "effectiveness_pct":   { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "internal_logs": {
+          "type": "object",
+          "properties": {
+            "enabled":             { "type": "boolean" },
+            "formats":             { "type": "array", "items": { "type": "string" } },
+            "mode":                { "type": "string" },
+            "processing_pipeline": { "type": "string" },
+            "action_generated":    { "type": "string" },
+            "feedback_loop":       { "type": "boolean" },
+            "effectiveness_pct":   { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        }
+      }
+    },
+    "testbed": {
+      "type": "object",
+      "required": ["nodes", "cpus", "cores_per_node", "memory_gb"],
+      "additionalProperties": true,
+      "properties": {
+        "nodes":           { "type": "integer", "const": 4 },
+        "cpus":            { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "cores_per_node":  { "type": "array", "items": { "type": "integer", "minimum": 1 }, "minItems": 1 },
+        "memory_gb":       { "type": "integer", "minimum": 1 },
+        "memory_type":     { "type": "string" },
+        "os":              { "type": "string" },
+        "container":       { "type": "string" },
+        "orchestrator":    { "type": "string" },
+        "roles":           { "type": "object" },
+        "endpoints":       { "type": "object" },
+        "production_claim":{ "type": "boolean" }
+      }
+    },
+    "p4_pipeline": {
+      "type": "object",
+      "required": ["target", "stages"],
+      "additionalProperties": true,
+      "properties": {
+        "target":       { "type": "string" },
+        "orchestrator": { "type": "string" },
+        "control_plane":{ "type": "string" },
+        "compiler":     { "type": "string" },
+        "stages": {
+          "type": "object",
+          "required": ["parser", "match_action", "metadata_gen"],
+          "properties": {
+            "parser":       { "type": "object", "required": ["script"] },
+            "match_action": { "type": "object", "required": ["script"] },
+            "metadata_gen": { "type": "object", "required": ["script"] }
+          }
+        },
+        "independently_benchmarked": { "type": "boolean" }
+      }
+    },
+    "dask_pipeline": {
+      "type": "object",
+      "required": ["framework", "stages"],
+      "additionalProperties": true,
+      "properties": {
+        "framework":          { "type": "string", "const": "dask" },
+        "scheduler":          { "type": "string" },
+        "n_workers":          { "type": ["integer", "null"], "minimum": 1 },
+        "threads_per_worker": { "type": "integer", "minimum": 1 },
+        "processes":          { "type": "boolean" },
+        "stages": {
+          "type": "object",
+          "required": ["distributed_loading", "feature_engineering", "label_integration", "split"],
+          "properties": {
+            "distributed_loading": { "type": "object" },
+            "feature_engineering": { "type": "object" },
+            "label_integration":   { "type": "object" },
+            "split":               { "type": "object" }
+          }
+        },
+        "performance": {
+          "type": "object",
+          "properties": {
+            "preprocessing_time_hours": { "type": "number", "minimum": 0 }
+          }
+        },
+        "microbenchmark": { "type": "object" }
+      }
+    },
+    "anomaly_detector": {
+      "type": "object",
+      "required": ["model", "layers", "heads", "attention_window"],
+      "additionalProperties": true,
+      "properties": {
+        "model":            { "type": "string", "const": "transformer" },
+        "layers":           { "type": "integer", "minimum": 1 },
+        "heads":            { "type": "integer", "minimum": 1 },
+        "attention_window": { "type": "integer", "minimum": 1 },
+        "attention_type":   { "type": "string" },
+        "temporal_decay":   { "type": "string" },
+        "embedding_dim":    { "type": "integer", "minimum": 1 },
+        "ffn_dim":          { "type": "integer", "minimum": 1 },
+        "dropout":          { "type": "number", "minimum": 0, "maximum": 1 },
+        "inference": {
+          "type": "object",
+          "properties": {
+            "latency_ms":       { "type": "number", "minimum": 0 },
+            "batch_size":       { "type": "integer", "minimum": 1 },
+            "quantisation":     { "type": "string" },
+            "pruning":          { "type": "boolean" },
+            "parallelisation":  { "type": "string" }
+          }
+        },
+        "threshold": {
+          "type": "object",
+          "properties": {
+            "mode":             { "type": "string" },
+            "base_rate_aware":  { "type": "boolean" },
+            "time_of_day_aware":{ "type": "boolean" }
+          }
+        },
+        "ensemble_fallback": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "models":  { "type": "integer", "minimum": 1 },
+            "voting":  { "type": "string" }
+          }
+        },
+        "features":    { "type": "array", "items": { "type": "string" } },
+        "integration": { "type": "object" }
+      }
+    },
+    "amps": {
+      "type": "object",
+      "required": ["control", "divergence", "isolation", "resources", "performance"],
+      "additionalProperties": true,
+      "properties": {
+        "control": {
+          "type": "object",
+          "required": ["model", "solver"],
+          "properties": {
+            "model":             { "type": "string" },
+            "solver":            { "type": "string" },
+            "discount_gamma":    { "type": "number", "minimum": 0, "maximum": 1 },
+            "planning_horizon":  { "type": "integer", "minimum": 1 }
+          }
+        },
+        "divergence": {
+          "type": "object",
+          "required": ["metrics"],
+          "properties": {
+            "metrics":           { "type": "array", "items": { "type": "string", "enum": ["kl", "renyi", "total_variation", "js"] } },
+            "renyi_alpha":       { "type": "number", "exclusiveMinimum": 1 },
+            "window_seconds":    { "type": "number", "exclusiveMinimum": 0 },
+            "adaptive_threshold":{ "type": "boolean" },
+            "threshold_floor":   { "type": "number", "minimum": 0 },
+            "threshold_ceiling": { "type": "number", "minimum": 0 }
+          }
+        },
+        "isolation": {
+          "type": "object",
+          "required": ["doh", "dot", "doq"],
+          "properties": {
+            "doh": { "type": "object", "required": ["mechanism"] },
+            "dot": { "type": "object", "required": ["mechanism"] },
+            "doq": { "type": "object", "required": ["mechanism"] }
+          }
+        },
+        "per_flow_state": {
+          "type": "object",
+          "properties": {
+            "enabled":                    { "type": "boolean" },
+            "ttl_seconds":                { "type": "integer", "minimum": 1 },
+            "auto_terminate_on_resolution":{ "type": "boolean" }
+          }
+        },
+        "resources": {
+          "type": "object",
+          "properties": {
+            "memory_gb":                { "type": "number", "minimum": 1 },
+            "timeout_seconds":          { "type": "integer", "minimum": 1 },
+            "traffic_replication_factor":{ "type": "integer", "minimum": 1 },
+            "resource_overhead_pct":    { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "performance": {
+          "type": "object",
+          "properties": {
+            "p99_mitigation_ms": { "type": "number", "minimum": 0 }
+          }
+        },
+        "failover": {
+          "type": "object",
+          "properties": {
+            "command":       { "type": "string" },
+            "preserve_logs": { "type": "boolean" }
+          }
+        },
+        "independently_benchmarked": { "type": "boolean" }
+      }
+    }
+  }
+}
