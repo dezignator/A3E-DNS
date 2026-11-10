@@ -1,0 +1,2 @@
+# Local placeholder: a 1×128 zero array, compressed.
+python -c "import numpy as np; np.savez_compressed('data/synthetic/benign_dns_traffic.npz', traffic=np.zeros((1,128), dtype=np.float32), labels=np.zeros(1, dtype=np.int64), n_features=np.array(128), seed=np.array(20261130))"
