@@ -1,0 +1,78 @@
+# ============================================================
+# A3E-DNS — Testbed configuration
+# Thesis §6.11.1 (hardware), §6.11.2 (software)
+# ============================================================
+# The testbed is a containerised 4-node environment. Throughput
+# figures (22.5 M QPS) are reported for this testbed only and are
+# not extrapolated to production. See LIMITATIONS.md §7.
+
+testbed:
+  # --- Hardware (§6.11.1) ---
+  nodes: 4
+  cpus:
+    - Intel_Xeon_Silver
+    - AMD_EPYC
+  cores_per_node:
+    - 16
+    - 32
+  memory_gb: 128
+  memory_type: DDR4
+  os: Ubuntu_Server_22.04_LTS
+
+  # --- Virtualisation (§6.11.2) ---
+  container: Docker
+  orchestrator: Kubernetes (Minikube)
+  virtualization:
+    - VMware_Workstation
+    - Oracle_VirtualBox
+  networking:
+    - docker_networks
+    - linux_netns
+    - virtual_bridges
+    - open_vswitch
+
+  # --- Software stack (§6.11.2) ---
+  languages:
+    - Python_3.11
+  ml:
+    - PyTorch
+    - TensorFlow
+  crypto:
+    - OpenFHE
+    - Microsoft_SEAL
+    - OpenSSL
+  observability:
+    - Prometheus
+    - Grafana
+  network:
+    - Wireshark
+    - tcpdump
+    - Scapy
+    - Open_vSwitch
+  rpc: gRPC
+  data: Dask
+
+  # --- Network monitoring & validation (§6.11.2) ---
+  traffic_tools:
+    - Scapy
+    - tcpreplay
+    - Wireshark
+    - tcpdump
+    - iperf3
+    - PennyLane
+
+  # --- Node roles (§6.11.1) ---
+  roles:
+    node_1: fl_coordinator
+    node_2: qhe_service
+    node_3: anomaly_sandbox
+    node_4: threat_intel_dataplane
+
+  # --- Deployment endpoints (emulated) ---
+  endpoints:
+    doh: 443
+    dot: 853
+    doq: 784
+
+  # --- Reproducibility caveat ---
+  production_claim: false                # §6.17.4: not extrapolatedconfigs/testbed.yaml
