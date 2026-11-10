@@ -1,0 +1,1 @@
+python -c "import numpy as np; np.savez_compressed('data/synthetic/tunneling_samples.npz', traffic=np.zeros((1,128), dtype=np.float32), labels=np.ones(1, dtype=np.int64), payload_lengths=np.array([60], dtype=np.int32), n_features=np.array(128), seed=np.array(20261131))"
