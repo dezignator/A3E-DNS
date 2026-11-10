@@ -1,0 +1,71 @@
+# ============================================================
+# A3E-DNS — QHE configuration (Optimized Quantum-Safe HE)
+# Thesis §6.5 (Eqs. 123–125), §6.5.3 (selective ops),
+#         §6.5.4 (CUDA on A100), §6.5.5 (compression + pipeline),
+#         Table 27 (operational effects)
+# ============================================================
+# AUTHORITATIVE PARAMETERS: §6.5 specifies n = 256, q = 4096.
+# NOTE: Table 27 of the thesis shows the QHE command line with
+# -lattice-dimension 1024 -modulus 3329. This is a documented
+# internal thesis inconsistency (see LIMITATIONS.md §8). The
+# values below follow §6.5, which is the parameterisation used
+# to obtain the reported QHE results.
+
+qhe:
+  # --- Ring-LWE scheme (§6.5.1) ---
+  scheme: ring_lwe
+  ring: "Z_q[x] / (x^n + 1)"
+  n: 256                              # §6.5 — ring dimension
+  q: 4096                             # §6.5 — modulus
+  plaintext_bits: 1                   # binary message encoding
+  error_distribution: discrete_gaussian
+
+  # --- NTT + AVX-512 (§6.5.1) ---
+  ntt: true                           # O(n log n) polynomial multiplication
+  ntt_implementation: optimized_cyclotomic
+  avx512_slots: 1024                  # SIMD lanes packed per op
+
+  # --- Ziggurat sampling (§6.5.2) ---
+  ziggurat: true
+  ziggurat_table_speedup_pct: 47      # measured sampling latency improvement
+
+  # --- Selective homomorphic operations (§6.5.3) ---
+  # Only additively-homomorphic ops are needed for the statistical
+  # tests; a bounded number of multiplications is needed for
+  # classification. Factor ≈ 8× reduction vs a general-purpose circuit.
+  selective_ops: true
+  homomorphic_ops:
+    additive: true
+    multiplicative: true
+    multiplicative_depth_max: 10       # 5–10 per §6.5.3 / §5.3.7
+  op_reduction_factor: 8
+
+  # --- CUDA / A100 acceleration (§6.5.4) ---
+  # A100: 6,912 CUDA cores, 40 GB HBM, ~2.5 TOPS lattice compute.
+  cuda:
+    enabled: true
+    device: a100
+    cuda_cores: 6912
+    memory_gb: 40
+    tops: 2.5
+    kernels:
+      - lattice_matmul
+      - ntt_stage
+    tensor_cores: true
+    mixed_precision: true
+
+  # --- Ciphertext compression + pipeline (§6.5.5) ---
+  compression_ratio: 8                # 8:1 packing
+  pipeline_depth: 3                   # key-gen → encrypt → eval
+  cpu_cores: 16                       # per §6.5
+
+  # --- Observed performance impact (Table 27) ---
+  performance_impact:
+    cpu_utilization_pct: 12
+    memory_mb: 256
+
+  # --- Failover (Table 27) ---
+  failover:
+    command: qhe-degrade
+    level: 512
+    mode: temporary
