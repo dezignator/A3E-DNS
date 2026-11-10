@@ -1,0 +1,51 @@
+# ============================================================
+# A3E-DNS — expected_outputs/MANIFEST.sha256
+# ============================================================
+# SHA-256 integrity manifest for every reference output in this
+# directory. Regenerate after any reproduction run:
+#
+#     cd expected_outputs
+#     sha256sum *.json *.svg *.png > MANIFEST.sha256
+#
+# The comments above and below this block are preserved by the
+# regeneration workflow; the `sha256sum` output goes at the end.
+#
+# Expected entries (14 files):
+#
+#   <sha256>  table_27_expected.json
+#   <sha256>  table_28_expected.json
+#   <sha256>  table_29_expected.json
+#   <sha256>  table_30_expected.json
+#   <sha256>  table_31_expected.json
+#   <sha256>  table_32_expected.json
+#   <sha256>  table_33_expected.json
+#   <sha256>  table_34a_expected.json
+#   <sha256>  figure_14_expected.svg
+#   <sha256>  figure_15_expected.png
+#   <sha256>  figure_16_expected.png
+#   <sha256>  figure_17_expected.png
+#   <sha256>  figure_18_expected.png
+#   <sha256>  figure_19_expected.png
+#
+# Until the first reproduction run, all entries are marked as
+# NOT-YET-GENERATED. This file is a template; the actual hashes
+# will replace the placeholder lines below.
+# ============================================================
+
+# The following lines are intentionally commented out until the
+# first reproduction run generates the reference outputs.
+
+# 0000000000000000000000000000000000000000000000000000000000000000  table_27_expected.json
+# 0000000000000000000000000000000000000000000000000000000000000000  table_28_expected.json
+# 0000000000000000000000000000000000000000000000000000000000000000  table_29_expected.json
+# 0000000000000000000000000000000000000000000000000000000000000000  table_30_expected.json
+# 0000000000000000000000000000000000000000000000000000000000000000  table_31_expected.json
+# 0000000000000000000000000000000000000000000000000000000000000000  table_32_expected.json
+# 0000000000000000000000000000000000000000000000000000000000000000  table_33_expected.json
+# 0000000000000000000000000000000000000000000000000000000000000000  table_34a_expected.json
+# 0000000000000000000000000000000000000000000000000000000000000000  figure_14_expected.svg
+# 0000000000000000000000000000000000000000000000000000000000000000  figure_15_expected.png
+# 0000000000000000000000000000000000000000000000000000000000000000  figure_16_expected.png
+# 0000000000000000000000000000000000000000000000000000000000000000  figure_17_expected.png
+# 0000000000000000000000000000000000000000000000000000000000000000  figure_18_expected.png
+# 0000000000000000000000000000000000000000000000000000000000000000  figure_19_expected.png
