@@ -1,0 +1,53 @@
+# ============================================================
+# A3E-DNS — Anomaly Detector configuration
+# Thesis §6.6.1 (spatio-temporal attention), §6.6.2 (temporal decay),
+#         §6.4.5 (neural controller), Table 27 (operational effects)
+# ============================================================
+# The transformer backbone is shared with the FL module; this file
+# configures the detector-specific parameters (inference, window,
+# ensemble fallback). See federated_learning.yaml for training.
+
+anomaly_detector:
+  # --- Model (§6.6.1, Table 27) ---
+  model: transformer
+  layers: 8
+  heads: 12
+  attention_window: 512
+  attention_type: spatio_temporal
+  temporal_decay: learnable
+  embedding_dim: 512
+  ffn_dim: 2048
+  dropout: 0.1
+
+  # --- Inference (§6.6.1, Table 27) ---
+  inference:
+    latency_ms: 0.08                    # per-query
+    batch_size: 1
+    quantisation: int8
+    pruning: true
+    parallelisation: multi_core
+
+  # --- Adaptive thresholds (§6.6.1, Table 27) ---
+  threshold:
+    mode: adaptive
+    base_rate_aware: true
+    time_of_day_aware: true
+
+  # --- Ensemble fallback (Table 27) ---
+  ensemble_fallback:
+    enabled: true
+    models: 3
+    voting: majority
+
+  # --- Input feature schema (per §6.4.5) ---
+  features:
+    - packet_size_moments
+    - inter_arrival_time_distribution
+    - entropy
+    - protocol_attributes
+
+  # --- Integration with AMPS (see amps.yaml) ---
+  integration:
+    amps_endpoint: grpc://node-3:50054
+    fl_endpoint: grpc://node-1:50051
+    threat_intel_endpoint: grpc://node-4:50055
