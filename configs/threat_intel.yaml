@@ -1,0 +1,67 @@
+# ============================================================
+# A3E-DNS — Threat Intelligence configuration
+# Thesis §6.7 (Table 28), §6.8 (internal log correlation)
+# ============================================================
+# Effectiveness figures are the measured fraction of blocked / detected /
+# prevented / protected / identified events attributable to each source
+# during the evaluation period; they are not claimed as general properties
+# of the sources.
+
+threat_intel:
+  # --- CERT Alerts (§6.7.1) ---
+  # STIX 2.1 objects transported via TAXII 2.1.
+  cert_alerts:
+    enabled: true
+    format: stix_taxii
+    stix_version: "2.1"
+    taxii_version: "2.1"
+    mode: push
+    ingestion_frequency: real_time
+    processing_pipeline: intel-parse -format stix -validate
+    action_generated: rules_update
+    rules_per_minute: 15
+    effectiveness_pct: 94.2              # Table 28
+
+  # --- Honeypot Telemetry (§6.7.2) ---
+  honeypot:
+    enabled: true
+    format: json
+    interval: 5min
+    processing_pipeline: honeypot-analyze -correlate
+    correlation: spatio_temporal_pattern_matching
+    action_generated: pattern_extraction_and_retraining
+    effectiveness_pct: 96.8              # Table 28
+
+  # --- Darknet Monitoring (§6.7.2) ---
+  darknet:
+    enabled: true
+    format: pcap
+    interval: hourly
+    processing_pipeline: darknet-scan -ioc-update
+    action_generated: ioc_database_update
+    effectiveness_pct: 89.5              # Table 28
+
+  # --- Vendor Feeds (§6.7.3) ---
+  vendor_feeds:
+    enabled: true
+    formats:
+      - csv
+      - json
+    interval: daily
+    processing_pipeline: vendor-intel -normalize -merge
+    weighting: vendor_reputation
+    deduplication: true
+    action_generated: signature_updates
+    effectiveness_pct: 92.1              # Table 28
+
+  # --- Internal Logs (§6.8) ---
+  internal_logs:
+    enabled: true
+    formats:
+      - syslog
+      - cef
+    mode: continuous
+    processing_pipeline: log-correlation -real-time
+    action_generated: anomaly_detection_enhancement
+    feedback_loop: true                  # §6.8
+    effectiveness_pct: 97.3              # Table 28
