@@ -1,0 +1,61 @@
+{
+  "table": 28,
+  "title": "Threat Intelligence Integration in A3E-DNS Framework",
+  "artifact_version": "1.0.0",
+  "thesis": {
+    "chapter": "Chapter 6",
+    "framework": "A3E-DNS",
+    "artifact_version": "1.0.0"
+  },
+  "rows": [
+    {
+      "source": "CERT Alerts",
+      "format": "stix_taxii",
+      "ingestion_frequency": "real_time",
+      "processing_pipeline": "intel-parse -format stix -validate",
+      "action_generated": "rules_update",
+      "effectiveness_pct": 94.2,
+      "effectiveness_label": "Blocked"
+    },
+    {
+      "source": "Honeypot Data",
+      "format": "json",
+      "ingestion_frequency": "5min",
+      "processing_pipeline": "honeypot-analyze -correlate",
+      "action_generated": "pattern_extraction_and_retraining",
+      "effectiveness_pct": 96.8,
+      "effectiveness_label": "Detected"
+    },
+    {
+      "source": "Darknet Monitoring",
+      "format": "pcap",
+      "ingestion_frequency": "hourly",
+      "processing_pipeline": "darknet-scan -ioc-update",
+      "action_generated": "ioc_database_update",
+      "effectiveness_pct": 89.5,
+      "effectiveness_label": "Prevented"
+    },
+    {
+      "source": "Vendor Feeds",
+      "format": "csv/json",
+      "ingestion_frequency": "daily",
+      "processing_pipeline": "vendor-intel -normalize -merge",
+      "action_generated": "signature_updates",
+      "effectiveness_pct": 92.1,
+      "effectiveness_label": "Protected"
+    },
+    {
+      "source": "Internal Logs",
+      "format": "syslog/cef",
+      "ingestion_frequency": "continuous",
+      "processing_pipeline": "log-correlation -real-time",
+      "action_generated": "anomaly_detection_enhancement",
+      "effectiveness_pct": 97.3,
+      "effectiveness_label": "Identified"
+    }
+  ],
+  "notes": [
+    "Effectiveness percentages are the measured fraction of blocked / detected / prevented / protected / identified events attributable to each source during the evaluation period.",
+    "They are not claimed as general properties of the sources."
+  ]
+}
