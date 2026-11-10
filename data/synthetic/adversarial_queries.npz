@@ -1,0 +1,1 @@
+python -c "import numpy as np; np.savez_compressed('data/synthetic/adversarial_queries.npz', clean=np.zeros((1,128), dtype=np.float32), adversarial=np.zeros((1,128), dtype=np.float32), epsilon=np.array(0.15), n_features=np.array(128), seed=np.array(20261132))"
