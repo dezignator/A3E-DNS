@@ -1,0 +1,67 @@
+# ============================================================
+# A3E-DNS — AI-Augmented Federated Learning configuration
+# Thesis §6.6 (Eqs. 126–130), §6.6.1 (spatio-temporal attention),
+#         §6.6.2 (temporal decay), §6.6.3 (min-max PGD),
+#         §6.6.4 (geometric median), §6.6.5 (DP convergence)
+# ============================================================
+
+federated_learning:
+  # --- Transformer backbone (§6.6.1, §6.6.2) ---
+  transformer:
+    layers: 8
+    heads: 12
+    attention_window: 512
+    attention_type: spatio_temporal
+    temporal_decay: learnable            # §6.6.2
+    embedding_dim: 512
+    ffn_dim: 2048
+    dropout: 0.1
+
+  # --- DP-SGD (§6.6.5, Eq. 129–130) ---
+  dp_sgd:
+    enabled: true
+    mechanism: gaussian
+    epsilon: 0.68                        # §6.6.5, §6.16
+    target_epsilon: 0.7                  # Table 27 CLI default; realized = 0.68
+    delta: 1.0e-5
+    clipping: per_client
+    clipping_norm: 1.0
+    noise_multiplier: computed_from_moments_accountant
+    accountant: rdp                     # RDP accountant per Eq. 60 (§4.22)
+
+  # --- Robust aggregation (§6.6.4, Eq. 127–128) ---
+  aggregation:
+    method: geometric_median
+    clipping_function: clip_C
+    clipping_norm_C: null                # set from estimated honest variance
+    cross_check_topological: true        # extra safeguard per §6.6.4
+    byzantine_tolerance:
+      max_fraction: 0.2                  # tested up to 20% Byzantine clients
+      isolation_threshold: 2.5           # MAD > 2.5σ
+
+  # --- Adversarial training (§6.6.3, Eq. 126) ---
+  adversarial_training:
+    enabled: true
+    method: pgd                          # Projected Gradient Descent
+    l_inf_epsilon: 0.3                   # bounded, per Table 30 S5
+    pgd_steps: 7
+    kl_regulariser: true                 # Eq. 126 second term
+
+  # --- Cross-check with topological detector (§6.6.4) ---
+  cross_check:
+    enabled: true
+    detector: topological
+    disagreement_threshold: null         # set per deployment
+
+  # --- Observed performance (§6.6, §6.16) ---
+  performance:
+    inference_latency_ms: 0.08           # Table 27: 0.08 ms/query
+    convergence_epochs: 10               # §6.6 / §8.1
+    bandwidth_per_round_mb: 1.2          # Table 27
+    rounds: 100                          # Table 27
+    clients: 100                         # Table 27
+
+  # --- Failover (Table 27) ---
+  failover:
+    command: fl-isolate
+    threshold_sigma: 3
