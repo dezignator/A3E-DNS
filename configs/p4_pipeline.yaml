@@ -1,0 +1,60 @@
+# ============================================================
+# A3E-DNS — Programmable Data Plane (P4) configuration
+# Thesis §6.12 (3-stage pipeline: Parser → Match-Action → Metadata)
+# ============================================================
+# Validated on BMv2 + Mininet + P4Runtime. Not benchmarked
+# against software-based monitoring on the same hardware
+# (out of scope per §6.12); see docs/LIMITATIONS.md §7.3.
+
+p4_pipeline:
+  # --- Target (§6.12) ---
+  target: bmv2                           # behavioural model
+  orchestrator: Mininet
+  control_plane: P4Runtime
+  compiler: p4c
+
+  # --- Three-stage pipeline (§6.12.1–§6.12.3) ---
+  stages:
+    # Stage 1 — Parser (§6.12.1): protocol identification
+    parser:
+      script: parser.p4
+      responsibilities:
+        - transport_layer_header_decode
+        - application_layer_header_decode
+        - protocol_identification
+      protocols:
+        doh: 443
+        dot: 853
+        doq: 853                         # UDP
+      output: protocol_classification
+
+    # Stage 2 — Match-Action (§6.12.2): statistics & features
+    match_action:
+      script: match_action.p4
+      responsibilities:
+        - flow_level_features
+        - timing_extraction
+        - packet_size_distribution
+        - protocol_attributes
+      feature_tables:
+        - packet_length
+        - inter_arrival
+        - protocol_attrs
+        - communication_stats
+
+    # Stage 3 — Metadata Generation (§6.12.3): telemetry
+    metadata_gen:
+      script: metadata_gen.p4
+      responsibilities:
+        - augment_packet_metadata
+        - forward_to_telemetry_interface
+      output_interface: telemetry
+      payload: metadata_only             # never raw payloads
+
+  # --- Feature extraction (out of pipeline) ---
+  feature_extraction:
+    user_plane_dissectors: true
+    max_parse_latency_us: 15
+
+  # --- Caveats ---
+  independently_benchmarked: false       # see docs/LIMITATIONS.md
