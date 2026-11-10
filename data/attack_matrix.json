@@ -1,0 +1,109 @@
+{
+  "version": "1.0.0",
+  "thesis": {
+    "chapter": "Chapter 6",
+    "framework": "A3E-DNS",
+    "artifact_version": "1.0.0"
+  },
+  "description": "S1–S5 attack scenarios (Table 32) and the 6-vector taxonomy (Table 30). Consumed by src/attacks/*, table_30_taxonomy.py, table_32_simulation_matrix.py.",
+  "taxonomy_6_vector": [
+    {
+      "vector_id": "V1",
+      "attack_class": "Traffic Analysis",
+      "specific_attack": "Statistical Fingerprinting",
+      "table_30_row": 1
+    },
+    {
+      "vector_id": "V2",
+      "attack_class": "Tunneling",
+      "specific_attack": "DNS-over-DNS",
+      "table_30_row": 2
+    },
+    {
+      "vector_id": "V3",
+      "attack_class": "Protocol Exploitation",
+      "specific_attack": "QUIC Downgrade",
+      "table_30_row": 3
+    },
+    {
+      "vector_id": "V4",
+      "attack_class": "ML Evasion",
+      "specific_attack": "Adversarial Query Crafting",
+      "table_30_row": 4
+    },
+    {
+      "vector_id": "V5",
+      "attack_class": "Quantum Preparation",
+      "specific_attack": "Harvest-and-Decrypt",
+      "table_30_row": 5
+    },
+    {
+      "vector_id": "V6",
+      "attack_class": "Side-Channel",
+      "specific_attack": "Cache Timing",
+      "table_30_row": 6
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "S1",
+      "name": "S1-Timing",
+      "vector_id": "V1",
+      "tool": "tshark + custom",
+      "command": "tshark -r capture.pcap -Y \"dns.time > 0.1\" -T fields -e frame.time_delta",
+      "traffic_pattern": "Right-skewed IAT",
+      "threshold": "D_KL(P||Q) > 0.30",
+      "response_ms": 0.4,
+      "success_pct": 98.7,
+      "fnr_pct": 1.3
+    },
+    {
+      "id": "S2",
+      "name": "S2-Tunnel",
+      "vector_id": "V2",
+      "tool": "dnscat2",
+      "command": "dnscat2-server -listen 0.0.0.0:53 -security=open",
+      "traffic_pattern": "60 B @ ~20 q/min",
+      "threshold": "H(X) < 4.2 bits",
+      "response_ms": 1.2,
+      "success_pct": 99.2,
+      "fnr_pct": 0.8
+    },
+    {
+      "id": "S3",
+      "name": "S3-Poison",
+      "vector_id": "V4",
+      "tool": "fl-attack",
+      "command": "python poison.py --malicious-updates 7 --bias 0.25",
+      "traffic_pattern": "δ ~ N(0.25, 0.1)",
+      "threshold": "Weight dev > 2σ",
+      "response_ms": 2.5,
+      "success_pct": 96.5,
+      "fnr_pct": 3.5
+    },
+    {
+      "id": "S4",
+      "name": "S4-Quantum",
+      "vector_id": "V5",
+      "tool": "liboqs / openssl",
+      "command": "openssl s_client -connect doh.example.com:443 -groups kyber1024",
+      "traffic_pattern": "PQ TLS handshake",
+      "threshold": "Quantum safety > 0.9",
+      "response_ms": 1.8,
+      "success_pct": 100.0,
+      "fnr_pct": 0.0
+    },
+    {
+      "id": "S5",
+      "name": "S5-Evasion",
+      "vector_id": "V4",
+      "tool": "ART",
+      "command": "python craft_queries.py -model blackbox -epsilon 0.15",
+      "traffic_pattern": "GAN-crafted adversarial DNS queries",
+      "threshold": "Confidence drop > 20%",
+      "response_ms": 0.9,
+      "success_pct": 97.8,
+      "fnr_pct": 2.2
+    }
+  ]
+}
