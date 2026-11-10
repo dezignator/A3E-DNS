@@ -1,0 +1,60 @@
+{
+  "version": "1.0.0",
+  "description": "Sample PacketMetadata records used by the pipeline tests. All ports/transport combinations mirror the DoH / DoT / DoQ protocols.",
+  "packets": [
+    {
+      "timestamp": 1762732800.0,
+      "src_ip": "10.0.0.1",
+      "dst_ip": "10.0.0.2",
+      "src_port": 50000,
+      "dst_port": 443,
+      "transport": "tcp",
+      "payload_length": 512,
+      "http2_frame_type": 1,
+      "tls_version": "TLSv1.3",
+      "cipher_suite": "TLS_AES_128_GCM_SHA256",
+      "sni": "doh.example.com",
+      "alpn": ["h2"],
+      "protocol": "doh"
+    },
+    {
+      "timestamp": 1762732801.0,
+      "src_ip": "10.0.0.1",
+      "dst_ip": "10.0.0.2",
+      "src_port": 50001,
+      "dst_port": 853,
+      "transport": "tcp",
+      "payload_length": 256,
+      "tls_version": "TLSv1.3",
+      "cipher_suite": "TLS_AES_256_GCM_SHA384",
+      "alpn": ["dot"],
+      "protocol": "dot"
+    },
+    {
+      "timestamp": 1762732802.0,
+      "src_ip": "10.0.0.1",
+      "dst_ip": "10.0.0.2",
+      "src_port": 50002,
+      "dst_port": 853,
+      "transport": "udp",
+      "payload_length": 128,
+      "quic_connection_id": "01020304",
+      "quic_version": 1,
+      "alpn": ["doq"],
+      "protocol": "doq"
+    },
+    {
+      "timestamp": 1762732803.0,
+      "src_ip": "10.0.0.1",
+      "dst_ip": "10.0.0.2",
+      "src_port": 50003,
+      "dst_port": 443,
+      "transport": "tcp",
+      "payload_length": 1024,
+      "http2_frame_type": 0,
+      "tls_version": "TLSv1.3",
+      "alpn": ["h2"],
+      "protocol": "doh"
+    }
+  ]
+}
