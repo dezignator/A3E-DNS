@@ -1,0 +1,52 @@
+{
+  "table": 27,
+  "title": "Real-Time Implementation Commands and Operational Effects",
+  "artifact_version": "1.0.0",
+  "thesis": {
+    "chapter": "Chapter 6",
+    "framework": "A3E-DNS",
+    "artifact_version": "1.0.0"
+  },
+  "rows": [
+    {
+      "component": "AEE Engine",
+      "command": "aee-daemon start -mode adaptive -entropy-source /dev/urandom",
+      "runtime_params": "Key rotation 10 s; entropy threshold ≥ 0.95",
+      "performance_impact": "+0.2 ms latency; 37% security gain",
+      "failover": "aee-fallback -scheme chacha20"
+    },
+    {
+      "component": "QHE Module",
+      "command": "qhe-service -lattice-dimension 1024 -modulus 3329 -parallel 8",
+      "runtime_params": "Gaussian N(0, 1, 58)",
+      "performance_impact": "+12% CPU; +256 MB mem",
+      "failover": "qhe-degrade -level 512 -temporary"
+    },
+    {
+      "component": "FL Coordinator",
+      "command": "fl-coord -rounds 100 -clients 100 -dp-epsilon 0.7",
+      "runtime_params": "Lap(0.1/0.7); geom. median",
+      "performance_impact": "~1.2 MB/round bandwidth",
+      "failover": "fl-isolate -client-id -threshold 3σ"
+    },
+    {
+      "component": "Anomaly Detector",
+      "command": "anomaly-detector -model transformer -layers 8 -heads 12",
+      "runtime_params": "Window 512; adaptive thresholds",
+      "performance_impact": "0.08 ms/query inference",
+      "failover": "ensemble-fallback -models 3 -voting"
+    },
+    {
+      "component": "Sandbox",
+      "command": "sandbox-create -isolated -memory 2GB -timeout 30s",
+      "runtime_params": "Traffic replication 3; full behavioral analysis",
+      "performance_impact": "~15% resource overhead",
+      "failover": "sandbox-kill -timeout -preserve-logs"
+    }
+  ],
+  "notes": [
+    "QHE command line reproduced verbatim from Table 27.",
+    "§6.5 specifies n=256, q=4096; the command line uses 1024/3329.",
+    "The inconsistency is documented in docs/LIMITATIONS.md §8 and is not corrected here."
+  ]
+}
