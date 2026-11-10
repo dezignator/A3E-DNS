@@ -1,0 +1,1 @@
+python -c "import numpy as np; np.savez_compressed('data/synthetic/byzantine_updates.npz', updates=np.zeros((20,16), dtype=np.float32), is_malicious=np.array([1]*7+[0]*13, dtype=np.int64), n_clients=np.array(20), n_malicious=np.array(7), n_features=np.array(16), seed=np.array(20261133))"
