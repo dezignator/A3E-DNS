@@ -1,0 +1,65 @@
+{
+  "version": "1.0.0",
+  "thesis": {
+    "chapter": "Chapter 6",
+    "framework": "A3E-DNS",
+    "artifact_version": "1.0.0"
+  },
+  "description": "Table 30 — Attack Vector Taxonomy and Real-Time Countermeasures. Expanded form with mechanism + framework response + command.",
+  "classes": [
+    {
+      "class_id": "TC1",
+      "attack_class": "Traffic Analysis",
+      "specific_attack": "Statistical Fingerprinting",
+      "mechanism": "Timing inference; pktsize ∈ [256, 1400]",
+      "framework_response": "AEE morphs timing Δt' = f(Δt, E(t))",
+      "countermeasure": "aee-morph -protocol doh -window 100ms -entropy 0.9",
+      "scenario": "S1"
+    },
+    {
+      "class_id": "TC2",
+      "attack_class": "Tunneling",
+      "specific_attack": "DNS-over-DNS",
+      "mechanism": "Base64 subdomains",
+      "framework_response": "QHE encrypted-domain pattern match",
+      "countermeasure": "qhe-scan -encrypted-traffic -pattern-match -threshold 0.87",
+      "scenario": "S2"
+    },
+    {
+      "class_id": "TC3",
+      "attack_class": "Protocol Exploitation",
+      "specific_attack": "QUIC Downgrade",
+      "mechanism": "Manipulated transport params",
+      "framework_response": "Adaptive protocol binding",
+      "countermeasure": "protocol-bind -min-version quic-v1 -max-version quic-v2 -strict",
+      "scenario": "S4 (partial)"
+    },
+    {
+      "class_id": "TC4",
+      "attack_class": "ML Evasion",
+      "specific_attack": "Adversarial Query Crafting",
+      "mechanism": "Q' = Q + ε·sign(∇_Q f(θ))",
+      "framework_response": "Federated adversarial training (PGD)",
+      "countermeasure": "fl-train -adversarial-epochs 50 -defense pgd -epsilon 0.3",
+      "scenario": "S5"
+    },
+    {
+      "class_id": "TC5",
+      "attack_class": "Quantum Preparation",
+      "specific_attack": "Harvest-and-Decrypt",
+      "mechanism": "Store now, decrypt later",
+      "framework_response": "Lattice KEM + periodic rotation",
+      "countermeasure": "qhe-rotate -scheme kyber1024 -interval 1h -post-quantum",
+      "scenario": "S4"
+    },
+    {
+      "class_id": "TC6",
+      "attack_class": "Side-Channel",
+      "specific_attack": "Cache Timing",
+      "mechanism": "σ² > 15 ms resolution variance",
+      "framework_response": "DP noise t' = t + Lap(0.1/ε)",
+      "countermeasure": "dp-inject -epsilon 0.7 -sensitivity 0.1 -mechanism laplacian",
+      "scenario": "S1 (timing)"
+    }
+  ]
+}
