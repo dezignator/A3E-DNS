@@ -1,0 +1,53 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-11-10T00:00:00Z",
+  "sources": ["vendor_a", "vendor_b"],
+  "reputation_prior": 0.5,
+  "entries": [
+    {
+      "vendor": "vendor_a",
+      "type": "domain-name",
+      "value": "malicious.example.org",
+      "confidence": 92,
+      "first_seen": "2026-10-01T00:00:00Z",
+      "last_seen": "2026-11-09T00:00:00Z",
+      "labels": ["phishing"]
+    },
+    {
+      "vendor": "vendor_a",
+      "type": "ipv4-addr",
+      "value": "203.0.113.17",
+      "confidence": 88,
+      "first_seen": "2026-10-15T00:00:00Z",
+      "last_seen": "2026-11-09T00:00:00Z",
+      "labels": ["scanner", "recon"]
+    },
+    {
+      "vendor": "vendor_b",
+      "type": "domain-name",
+      "value": "tunnel.example.com",
+      "confidence": 95,
+      "first_seen": "2026-10-20T00:00:00Z",
+      "last_seen": "2026-11-10T00:00:00Z",
+      "labels": ["tunnel", "exfiltration"]
+    },
+    {
+      "vendor": "vendor_b",
+      "type": "ipv4-addr",
+      "value": "192.0.2.42",
+      "confidence": 90,
+      "first_seen": "2026-10-25T00:00:00Z",
+      "last_seen": "2026-11-10T00:00:00Z",
+      "labels": ["c2"]
+    },
+    {
+      "vendor": "vendor_b",
+      "type": "domain-name",
+      "value": "xjkqwpvbnz.example",
+      "confidence": 70,
+      "first_seen": "2026-11-01T00:00:00Z",
+      "last_seen": "2026-11-09T00:00:00Z",
+      "labels": ["dga"]
+    }
+  ]
+}
