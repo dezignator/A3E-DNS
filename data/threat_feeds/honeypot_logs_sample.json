@@ -1,0 +1,52 @@
+{
+  "version": "1.0.0",
+  "window_seconds": 300,
+  "window_start": "2026-11-10T00:00:00Z",
+  "window_end": "2026-11-10T00:05:00Z",
+  "events": [
+    {
+      "timestamp": "2026-11-10T00:00:12Z",
+      "src_ip": "203.0.113.17",
+      "dst_ip": "198.51.100.10",
+      "port": 53,
+      "protocol": "tcp",
+      "tags": ["recon", "dns"],
+      "description": "DNS SOA query burst from external scanner"
+    },
+    {
+      "timestamp": "2026-11-10T00:01:34Z",
+      "src_ip": "192.0.2.42",
+      "dst_ip": "198.51.100.10",
+      "port": 443,
+      "protocol": "tcp",
+      "tags": ["c2", "doh"],
+      "description": "DoH beaconing pattern consistent with known C2"
+    },
+    {
+      "timestamp": "2026-11-10T00:02:15Z",
+      "src_ip": "203.0.113.17",
+      "dst_ip": "198.51.100.11",
+      "port": 853,
+      "protocol": "tcp",
+      "tags": ["recon", "dot"],
+      "description": "DoT TLS handshake from scanner"
+    },
+    {
+      "timestamp": "2026-11-10T00:03:02Z",
+      "domain": "tunnel.example.com",
+      "port": 53,
+      "protocol": "udp",
+      "tags": ["tunnel", "exfiltration"],
+      "description": "DNS tunnel observed (dnscat2 signature)"
+    },
+    {
+      "timestamp": "2026-11-10T00:04:48Z",
+      "src_ip": "192.0.2.42",
+      "dst_ip": "198.51.100.12",
+      "port": 784,
+      "protocol": "udp",
+      "tags": ["doq", "c2"],
+      "description": "DoQ connection migration attempt"
+    }
+  ]
+}
