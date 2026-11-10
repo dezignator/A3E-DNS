@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+<rect width="1400" height="900" fill="#fafafa"/>
+<text x="700" y="40" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="bold" fill="#111">A³E-DNS — Integrated Security Architecture</text>
+<text x="700" y="70" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#555">Chapter 6 · A3E-DNS · artifact v1.0.0</text>
+<rect x="60" y="110" width="1280" height="240" rx="12" fill="#dbeafe" stroke="#1e40af" stroke-width="2"/>
+<text x="80" y="140" font-family="sans-serif" font-size="18" font-weight="bold" fill="#1e40af">Data Plane</text>
+<rect x="80" y="170" width="288" height="150" rx="8" fill="#ffffff" stroke="#1e40af" stroke-width="1"/>
+<text x="224" y="210" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">eBPF / XDP packet capture</text>
+<rect x="384" y="170" width="288" height="150" rx="8" fill="#ffffff" stroke="#1e40af" stroke-width="1"/>
+<text x="528" y="210" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">P4 3-stage metadata</text>
+<text x="528" y="234" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">extraction</text>
+<rect x="688" y="170" width="288" height="150" rx="8" fill="#ffffff" stroke="#1e40af" stroke-width="1"/>
+<text x="832" y="210" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Adaptive Evolutionary</text>
+<text x="832" y="234" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Encryption (AEE)</text>
+<rect x="992" y="170" width="288" height="150" rx="8" fill="#ffffff" stroke="#1e40af" stroke-width="1"/>
+<text x="1136" y="210" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Quantum-Safe Homomorphic</text>
+<text x="1136" y="234" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Encryption (QHE)</text>
+<rect x="60" y="370" width="1280" height="240" rx="12" fill="#dcfce7" stroke="#166534" stroke-width="2"/>
+<text x="80" y="400" font-family="sans-serif" font-size="18" font-weight="bold" fill="#166534">Control Plane</text>
+<rect x="80" y="430" width="288" height="150" rx="8" fill="#ffffff" stroke="#166534" stroke-width="1"/>
+<text x="224" y="470" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Federated Learning</text>
+<text x="224" y="494" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">coordinator</text>
+<rect x="384" y="430" width="288" height="150" rx="8" fill="#ffffff" stroke="#166534" stroke-width="1"/>
+<text x="528" y="470" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Transformer-based anomaly</text>
+<text x="528" y="494" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">detector</text>
+<rect x="688" y="430" width="288" height="150" rx="8" fill="#ffffff" stroke="#166534" stroke-width="1"/>
+<text x="832" y="470" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Threat Intelligence</text>
+<text x="832" y="494" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">integration (STIX/TAXII,</text>
+<text x="832" y="518" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">honeypot, darknet, vendor,</text>
+<text x="832" y="542" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">internal)</text>
+<rect x="992" y="430" width="288" height="150" rx="8" fill="#ffffff" stroke="#166534" stroke-width="1"/>
+<text x="1136" y="470" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Adaptive Multi-Protocol</text>
+<text x="1136" y="494" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Sandbox (AMPS)</text>
+<rect x="60" y="630" width="1280" height="240" rx="12" fill="#fef3c7" stroke="#92400e" stroke-width="2"/>
+<text x="80" y="660" font-family="sans-serif" font-size="18" font-weight="bold" fill="#92400e">Management Plane</text>
+<rect x="80" y="690" width="288" height="150" rx="8" fill="#ffffff" stroke="#92400e" stroke-width="1"/>
+<text x="224" y="730" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Human-in-the-loop policy</text>
+<text x="224" y="754" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">configuration</text>
+<rect x="384" y="690" width="288" height="150" rx="8" fill="#ffffff" stroke="#92400e" stroke-width="1"/>
+<text x="528" y="730" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Monitoring and visualisation</text>
+<text x="528" y="754" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">(Prometheus + Grafana)</text>
+<rect x="688" y="690" width="288" height="150" rx="8" fill="#ffffff" stroke="#92400e" stroke-width="1"/>
+<text x="832" y="730" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Compliance and</text>
+<text x="832" y="754" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">certification module</text>
+<rect x="992" y="690" width="288" height="150" rx="8" fill="#ffffff" stroke="#92400e" stroke-width="1"/>
+<text x="1136" y="730" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">Failover and recovery</text>
+<text x="1136" y="754" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#111">coordinator</text>
+<rect x="60" y="880" width="1280" height="0" fill="none"/>
+<text x="700" y="872" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#333">P(τ) = S_eBPF ∘ F_QHE ∘ A_FL ∘ M_sandbox   (Eq. 117)</text>
+</svg>
