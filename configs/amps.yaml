@@ -1,0 +1,82 @@
+# ============================================================
+# A3E-DNS — AMPS configuration (Adaptive Multi-Protocol Sandbox)
+# Thesis §6.3.2 (security service composition),
+#         §6.17.3 (integrated defense),
+#         Table 27 (sandbox operational effects)
+# ============================================================
+# Protocol-aware isolation is implemented as:
+#   - DoH → HTTP/2 stream termination (per-stream)
+#   - DoT → TLS 1.3 session reset (context cleared)
+#   - DoQ → QUIC connection migration (session preserved)
+# Trigger is KL / Rényi divergence above an adaptive threshold.
+# The sandbox was NOT independently benchmarked against a
+# reference isolation strategy (§7.3 / §8.2.13); it is evaluated
+# as part of the end-to-end pipeline only.
+
+amps:
+  # --- Control model (§6.3.2, §6.17.3) ---
+  control:
+    model: mdp
+    solver: hamilton_jacobi_bellman
+    discount_gamma: 0.95
+    planning_horizon: 5
+
+  # --- Triggering divergence (§6.3.2) ---
+  divergence:
+    metrics:
+      - kl
+      - renyi
+    renyi_alpha: 2.0
+    window_seconds: 10
+    adaptive_threshold: true
+    threshold_floor: 0.3
+    threshold_ceiling: 3.0
+
+  # --- Protocol-aware isolation strategies (§6.3.2) ---
+  isolation:
+    doh:
+      mechanism: http2_stream_termination
+      description: |
+        Terminate only the affected HTTP/2 stream and redirect
+        subsequent traffic to a sandbox proxy. Multiplexed streams
+        on the same connection are preserved.
+      affects_other_streams: false
+    dot:
+      mechanism: tls13_session_reset
+      description: |
+        Reset the TLS 1.3 context and force a re-handshake through
+        the sandbox. TLS 1.3 session resumption keeps re-establishment
+        fast enough that legitimate traffic is not affected.
+      resumption_supported: true
+    doq:
+      mechanism: quic_connection_migration
+      description: |
+        Migrate the QUIC connection to a sandbox path using QUIC's
+        native connection-migration capability. The encrypted session
+        is preserved; only the path changes.
+      preserves_session: true
+
+  # --- Per-flow state management (§6.3.2) ---
+  per_flow_state:
+    enabled: true
+    ttl_seconds: 300
+    auto_terminate_on_resolution: true
+
+  # --- Sandbox resource envelope (Table 27) ---
+  resources:
+    memory_gb: 2
+    timeout_seconds: 30
+    traffic_replication_factor: 3
+    resource_overhead_pct: 15
+
+  # --- Observed performance (Table 27) ---
+  performance:
+    p99_mitigation_ms: 1.5
+
+  # --- Failover (Table 27) ---
+  failover:
+    command: sandbox-kill
+    preserve_logs: true
+
+  # --- Evaluation caveat (§6.3.2 / §7.3) ---
+  independently_benchmarked: falseconfigs/amps.yaml
