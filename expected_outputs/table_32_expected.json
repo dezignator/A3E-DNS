@@ -1,0 +1,100 @@
+{
+  "table": 32,
+  "title": "Attack Scenario Simulation Matrix for Real-Time Encrypted DNS Threat Evaluation with False Negative Rate Analysis",
+  "artifact_version": "1.0.0",
+  "thesis": {
+    "chapter": "Chapter 6",
+    "framework": "A3E-DNS",
+    "artifact_version": "1.0.0"
+  },
+  "n_scenarios": 5,
+  "rows": [
+    {
+      "id": "S1",
+      "name": "S1-Timing",
+      "command": "tshark -r capture.pcap -Y \"dns.time > 0.1\" -T fields -e frame.time_delta",
+      "detected": true,
+      "reported_success_rate": 98.7,
+      "reported_fnr": 1.3,
+      "reported_response_ms": 0.4,
+      "target_success_rate": 98.7,
+      "target_fnr": 1.3,
+      "target_response_ms": 0.4,
+      "metrics": {
+        "kl_divergence": 0.0,
+        "threshold": 0.3
+      }
+    },
+    {
+      "id": "S2",
+      "name": "S2-Tunnel",
+      "command": "dnscat2-server -listen 0.0.0.0:53 -security=open",
+      "detected": true,
+      "reported_success_rate": 99.2,
+      "reported_fnr": 0.8,
+      "reported_response_ms": 1.2,
+      "target_success_rate": 99.2,
+      "target_fnr": 0.8,
+      "target_response_ms": 1.2,
+      "metrics": {
+        "entropy_bits": 0.0,
+        "threshold_bits": 4.2
+      }
+    },
+    {
+      "id": "S3",
+      "name": "S3-Poison",
+      "command": "python poison.py --malicious-updates 7 --bias 0.25",
+      "detected": true,
+      "reported_success_rate": 96.5,
+      "reported_fnr": 3.5,
+      "reported_response_ms": 2.5,
+      "target_success_rate": 96.5,
+      "target_fnr": 3.5,
+      "target_response_ms": 2.5,
+      "metrics": {
+        "n_malicious_detected": 7,
+        "n_malicious_total": 7
+      }
+    },
+    {
+      "id": "S4",
+      "name": "S4-Quantum",
+      "command": "openssl s_client -connect doh.example.com:443 -groups kyber1024",
+      "detected": true,
+      "reported_success_rate": 100.0,
+      "reported_fnr": 0.0,
+      "reported_response_ms": 1.8,
+      "target_success_rate": 100.0,
+      "target_fnr": 0.0,
+      "target_response_ms": 1.8,
+      "metrics": {
+        "min_score": 0.9,
+        "threshold": 0.9
+      }
+    },
+    {
+      "id": "S5",
+      "name": "S5-Evasion",
+      "command": "python craft_queries.py -model blackbox -epsilon 0.15",
+      "detected": true,
+      "reported_success_rate": 97.8,
+      "reported_fnr": 2.2,
+      "reported_response_ms": 0.9,
+      "target_success_rate": 97.8,
+      "target_fnr": 2.2,
+      "target_response_ms": 0.9,
+      "metrics": {
+        "mean_confidence_drop_pct": 25.0,
+        "threshold_pct": 20.0
+      }
+    }
+  ],
+  "reported_table32": {
+    "S1": {"success": 98.7, "fnr": 1.3, "response_ms": 0.4},
+    "S2": {"success": 99.2, "fnr": 0.8, "response_ms": 1.2},
+    "S3": {"success": 96.5, "fnr": 3.5, "response_ms": 2.5},
+    "S4": {"success": 100.0, "fnr": 0.0, "response_ms": 1.8},
+    "S5": {"success": 97.8, "fnr": 2.2, "response_ms": 0.9}
+  }
+}
