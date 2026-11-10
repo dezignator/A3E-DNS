@@ -1,0 +1,246 @@
+# ============================================================
+# A3E-DNS — docker-compose.yml
+# Thesis artifact (Chapter 6) · §6.11.1 testbed simulation
+# ============================================================
+# 4-node testbed simulation:
+#   node-1 (Intel Xeon Silver profile)  — FL coordinator + AEE
+#   node-2 (AMD EPYC profile)           — QHE service
+#   node-3 (AMD EPYC profile)           — Anomaly detector + AMPS sandbox
+#   node-4 (Intel Xeon Silver profile)  — Threat intel + P4/eBPF data plane
+#
+# Matches §6.11.1:
+#   - 4 nodes
+#   - Intel Xeon Silver + AMD EPYC
+#   - 128 GB DDR4 per node (emulated as container memory limits)
+#   - Ubuntu Server 22.04 LTS
+#   - Docker + Kubernetes (Minikube)
+#   - Python 3.11, PyTorch, TensorFlow
+#   - OpenFHE, Microsoft SEAL, OpenSSL
+#   - Prometheus + Grafana
+#   - Wireshark, tcpdump, Scapy, Open vSwitch
+#   - gRPC, Dask
+#
+# Usage:
+#   docker compose -f docker-compose.yml up -d
+#   docker compose -f docker-compose.yml logs -f node-1
+#   docker compose -f docker-compose.yml down -v
+
+version: "3.9"
+
+name: a3e-dns
+
+# ---------- Shared network ----------
+networks:
+  a3e-net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+
+# ---------- Shared volumes ----------
+volumes:
+  a3e-data: {}
+  a3e-results: {}
+  a3e-prometheus: {}
+  a3e-grafana: {}
+
+# ---------- Common service template ----------
+x-a3e-common: &a3e-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: a3e-dns:1.0.0
+  restart: unless-stopped
+  networks:
+    - a3e-net
+  environment:
+    A3E_DNS_MODE: ${A3E_DNS_MODE:-medium}
+    A3E_DNS_LOG_LEVEL: ${A3E_DNS_LOG_LEVEL:-INFO}
+    PYTHONUNBUFFERED: "1"
+    TZ: "UTC"
+  volumes:
+    - a3e-data:/opt/a3e-dns/data
+    - a3e-results:/opt/a3e-dns/outputs
+  security_opt:
+    - no-new-privileges:true
+  cap_add:
+    - NET_ADMIN       # required for tcpdump / eBPF / OVS in node-4
+    - NET_RAW         # required for Scapy / tshark in node-4
+    - SYS_ADMIN       # required for Mininet in node-4 (emulated)
+
+# ---------- Services ----------
+services:
+
+  # ---- node-1 — Intel Xeon Silver profile ----
+  node-1:
+    <<: *a3e-common
+    container_name: a3e-node-1
+    hostname: node-1
+    cpus: "16.0"
+    mem_limit: 128g
+    mem_reservation: 32g
+    environment:
+      A3E_NODE_ROLE: fl-coordinator
+      A3E_NODE_PROFILE: intel-xeon-silver
+      A3E_DNS_MODE: ${A3E_DNS_MODE:-medium}
+      A3E_DNS_LOG_LEVEL: ${A3E_DNS_LOG_LEVEL:-INFO}
+      FL_COORD_ROUNDS: "100"
+      FL_COORD_CLIENTS: "100"
+      FL_COORD_DP_EPSILON: "0.68"
+      FL_COORD_FAILOVER_THRESHOLD: "3"
+    command: ["--mode", "${A3E_DNS_MODE:-medium}", "--role", "fl-coordinator", "--verify"]
+    ports:
+      - "50051:50051"     # gRPC FL coordinator
+      - "8001:8000"       # Prometheus metrics
+    depends_on:
+      - node-2
+      - node-3
+      - node-4
+    healthcheck:
+      test: ["CMD", "python3.11", "-c", "import grpc; print('ok')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ---- node-2 — AMD EPYC profile ----
+  node-2:
+    <<: *a3e-common
+    container_name: a3e-node-2
+    hostname: node-2
+    cpus: "32.0"
+    mem_limit: 128g
+    mem_reservation: 32g
+    environment:
+      A3E_NODE_ROLE: qhe-service
+      A3E_NODE_PROFILE: amd-epyc
+      A3E_DNS_MODE: ${A3E_DNS_MODE:-medium}
+      A3E_DNS_LOG_LEVEL: ${A3E_DNS_LOG_LEVEL:-INFO}
+      QHE_LATTICE_DIM: "256"      # §6.5 — n = 256
+      QHE_MODULUS: "4096"          # §6.5 — q = 4096
+      QHE_PARALLEL: "8"
+      QHE_NTT: "true"
+      QHE_AVX512_SLOTS: "1024"
+      QHE_ZIGGURAT: "true"
+      QHE_PIPELINE_DEPTH: "3"
+    command: ["--mode", "${A3E_DNS_MODE:-medium}", "--role", "qhe-service", "--verify"]
+    ports:
+      - "50052:50052"     # gRPC QHE service
+      - "8002:8000"       # Prometheus metrics
+    healthcheck:
+      test: ["CMD", "python3.11", "-c", "import tenseal; print('ok')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # ---- node-3 — AMD EPYC profile ----
+  node-3:
+    <<: *a3e-common
+    container_name: a3e-node-3
+    hostname: node-3
+    cpus: "32.0"
+    mem_limit: 128g
+    mem_reservation: 32g
+    environment:
+      A3E_NODE_ROLE: anomaly-sandbox
+      A3E_NODE_PROFILE: amd-epyc
+      A3E_DNS_MODE: ${A3E_DNS_MODE:-medium}
+      A3E_DNS_LOG_LEVEL: ${A3E_DNS_LOG_LEVEL:-INFO}
+      ANOMALY_MODEL: transformer
+      ANOMALY_LAYERS: "8"
+      ANOMALY_HEADS: "12"
+      ANOMALY_WINDOW: "512"
+      ANOMALY_INFERENCE_MS: "0.08"
+      AMPS_MEMORY_GB: "2"
+      AMPS_TIMEOUT_S: "30"
+    command: ["--mode", "${A3E_DNS_MODE:-medium}", "--role", "anomaly-sandbox", "--verify"]
+    ports:
+      - "50053:50053"     # gRPC anomaly detector
+      - "50054:50054"     # gRPC AMPS sandbox
+      - "8003:8000"       # Prometheus metrics
+    healthcheck:
+      test: ["CMD", "python3.11", "-c", "import torch; print('ok')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ---- node-4 — Intel Xeon Silver profile (data plane) ----
+  node-4:
+    <<: *a3e-common
+    container_name: a3e-node-4
+    hostname: node-4
+    cpus: "16.0"
+    mem_limit: 128g
+    mem_reservation: 32g
+    environment:
+      A3E_NODE_ROLE: threat-intel-dataplane
+      A3E_NODE_PROFILE: intel-xeon-silver
+      A3E_DNS_MODE: ${A3E_DNS_MODE:-medium}
+      A3E_DNS_LOG_LEVEL: ${A3E_DNS_LOG_LEVEL:-INFO}
+      TI_CERT_ENABLED: "true"
+      TI_HONEYPOT_ENABLED: "true"
+      TI_DARKNET_ENABLED: "true"
+      TI_VENDOR_ENABLED: "true"
+      TI_INTERNAL_ENABLED: "true"
+      P4_PIPELINE: "3-stage"
+      P4_STAGE1: parser.p4
+      P4_STAGE2: match_action.p4
+      P4_STAGE3: metadata_gen.p4
+      EBPF_XDP_ENABLED: "true"
+      MININET_TOPOLOGY: bmv2
+    command: ["--mode", "${A3E_DNS_MODE:-medium}", "--role", "threat-intel-dataplane", "--verify"]
+    ports:
+      - "50055:50055"     # gRPC threat intel
+      - "8004:8000"       # Prometheus metrics
+      - "443:443"         # DoH (emulated resolver endpoint)
+      - "853:853"         # DoT (emulated resolver endpoint)
+      - "784:784/udp"     # DoQ (emulated resolver endpoint)
+    healthcheck:
+      test: ["CMD", "python3.11", "-c", "import scapy; print('ok')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ---- Prometheus (§6.11.2) ----
+  prometheus:
+    image: prom/prometheus:v2.54.0
+    container_name: a3e-prometheus
+    restart: unless-stopped
+    networks:
+      - a3e-net
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - a3e-prometheus:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.listen-address=0.0.0.0:9090"
+    ports:
+      - "9090:9090"
+    depends_on:
+      - node-1
+      - node-2
+      - node-3
+      - node-4
+
+  # ---- Grafana (§6.11.2) ----
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: a3e-grafana
+    restart: unless-stopped
+    networks:
+      - a3e-net
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-a3e-dns}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - a3e-grafana:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
