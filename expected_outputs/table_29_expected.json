@@ -1,0 +1,89 @@
+{
+  "table": 29,
+  "title": "Certification and Compliance Verification in the Proposed Encrypted DNS Security Framework",
+  "artifact_version": "1.0.0",
+  "thesis": {
+    "chapter": "Chapter 6",
+    "framework": "A3E-DNS",
+    "artifact_version": "1.0.0"
+  },
+  "rows": [
+    {
+      "standard": "NIST CSF",
+      "technical_properties": [
+        "Identify: framework inventory is present in the manifest",
+        "Protect: AEE + QHE + FL isolation fields are configured",
+        "Detect: threat-intel correlation is enabled",
+        "Respond: AMPS sandbox is configured",
+        "Recover: failover paths are configured for all components"
+      ],
+      "verification_method": "src.compliance checkers against framework metadata",
+      "limits": [
+        "No continuous-monitoring certification",
+        "Organisational audit required for full NIST CSF compliance"
+      ],
+      "verdict": "pass"
+    },
+    {
+      "standard": "GDPR",
+      "technical_properties": [
+        "Data minimisation: FL keeps raw queries on the client",
+        "Differential privacy: ε bound is set (ε = 0.68)",
+        "ZK attestation: resolver integrity without metadata disclosure",
+        "Storage limitation: threat feeds have bounded retention"
+      ],
+      "verification_method": "src.compliance checkers against framework metadata",
+      "limits": [
+        "Requires organisational audit",
+        "Does not certify GDPR compliance"
+      ],
+      "verdict": "pass"
+    },
+    {
+      "standard": "ISO 27001",
+      "technical_properties": [
+        "Access control at the FL coordinator",
+        "Audit trail via internal-log correlation",
+        "Role separation: coordinator / QHE / anomaly / data plane"
+      ],
+      "verification_method": "src.compliance checkers against framework metadata",
+      "limits": [
+        "Not a certified ISMS",
+        "Organisational audit required"
+      ],
+      "verdict": "pass"
+    },
+    {
+      "standard": "PCI DSS",
+      "technical_properties": [
+        "Cardholder-data isolation via the AMPS sandbox",
+        "No plaintext exposure of query payloads",
+        "Authenticated transport (TLS 1.3 / QUIC)"
+      ],
+      "verification_method": "src.compliance checkers against framework metadata",
+      "limits": [
+        "Scope limited to encrypted DNS traffic",
+        "Organisational audit required"
+      ],
+      "verdict": "pass"
+    },
+    {
+      "standard": "FISMA",
+      "technical_properties": [
+        "Cryptographic protection of data-in-use via QHE",
+        "Hardware entropy (RDRAND / RDSEED) available",
+        "FL isolation from the central aggregator"
+      ],
+      "verification_method": "src.compliance checkers against framework metadata",
+      "limits": [
+        "Post-quantum assumption is conjectural",
+        "Organisational audit required"
+      ],
+      "verdict": "pass"
+    }
+  ],
+  "notes": [
+    "These are technical properties, not compliance certifications.",
+    "A full compliance determination requires an organisational audit (record keeping, retention, access control, breach notification, governance) that is out of scope for this artifact."
+  ]
+}
