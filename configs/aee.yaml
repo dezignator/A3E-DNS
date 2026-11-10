@@ -1,0 +1,60 @@
+# ============================================================
+# A3E-DNS — AEE configuration (Adaptive Evolutionary Encryption)
+# Thesis §6.4 (Eqs. 119–122), §6.4.3 (hardware entropy),
+#         §6.4.5 (neural controller), Table 27 (operational effects)
+# ============================================================
+# No new cryptographic primitive is proposed; this is a configuration
+# of published methods. See Table 34a in README.md for the closest
+# published method per component.
+
+aee:
+  # --- Lie-group state evolution (§6.4.2) ---
+  # The state is represented on the n-fold special Euclidean group
+  # SE(3)^n. Rotational block → 256-bit key material; translational
+  # block → IV and rotation cadence.
+  se3_dim: n                          # n-fold SE(3); set per testbed
+  key_bits: 256                       # 256-bit session keys
+  state_vector_dim: 64                # quantised at 16 bits per element
+  rotation_cadence: derived_from_translation  # §6.4.2
+
+  # --- Diffusion coefficient bounds (§6.4.4, Eq. 122) ---
+  # Sigma(K_t, t) = min + (max - min) * exp(-∫ λ(s)||∇L_quantum(K_s)||² ds)
+  # Constraint: 0 < sigma_min <= sigma_max (positive lower bound kept).
+  sigma_min: 1.0e-6                   # strictly > 0, per Eq. 122
+  sigma_max: 1.0e-2                   # strictly > sigma_min
+  sigma_function: "psi(D_KL(P_traffic || P_baseline))"   # Eq. 120
+
+  # --- Hardware entropy (§6.4.3) ---
+  # RDRAND/RDSEED plus /dev/urandom, mixed with cryptographic whitening.
+  entropy_source:
+    - /dev/urandom
+    - RDRAND
+    - RDSEED
+  entropy_mix: cryptographic_whitening     # §6.4.3
+  entropy_threshold: 0.95                  # Table 27: entropy ≥ 0.95
+  key_rotation_seconds: 10                 # Table 27: rotation every 10 s
+
+  # --- Neural controller (§6.4.5) ---
+  # 2x64 MLP, 1000-packet window, RL training. Inference must not
+  # perturb DNS resolution, so budget is sub-microsecond.
+  neural_controller:
+    hidden_layers: 2
+    neurons_per_layer: 64
+    input_window_packets: 1000
+    features:
+      - size_moments
+      - iat_dist
+      - entropy
+      - protocol_attrs
+    training: reinforcement_learning
+    inference_budget_us: 1
+
+  # --- Observed performance impact (Table 27) ---
+  performance_impact:
+    latency_ms: 0.2                    # ≈ +0.2 ms latency
+    security_gain_pct: 37              # measured security gain
+
+  # --- Failover (Table 27) ---
+  failover:
+    command: aee-fallback
+    scheme: chacha20
