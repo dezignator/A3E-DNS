@@ -1,0 +1,10 @@
+numpy>=1.26
+scipy>=1.11
+pandas>=2.0
+matplotlib>=3.8
+tabulate>=0.9
+pyyaml>=6.0
+# optional
+# torch>=2.2        # src/a3e_dns_v2/torch_detector_v2.py
+# dask[dataframe]   # deployment/v2/scripts/dask_preprocess_v2.py
+# mininet           # deployment/v2/scripts/mininet_topology_v2.py (system package)

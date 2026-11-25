@@ -1,0 +1,8 @@
+# Usage: make -f Makefile.v2 <target>
+PY ?= python3
+.PHONY: test results dashboard all clean
+test:        ; PYTHONPATH=src $(PY) tests_v2/test_core.py
+results:     ; cd experiments_v2 && $(PY) run_all.py
+dashboard:   ; $(PY) tools_v2/build_dashboard.py
+all: test results dashboard
+clean:       ; rm -f results_v2/tables/* results_v2/figures/* results_v2/logs/* results_v2/run_metadata.json
