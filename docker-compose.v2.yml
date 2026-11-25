@@ -1,0 +1,20 @@
+# A3E-DNS v2 reference stack. Image names are placeholders: pin them to the versions used in your testbed.
+# The stack is structure only; it has not been started in the environment that produced the v2 files.
+services:
+  resolver-frontend:
+    image: ${DNSDIST_IMAGE:-powerdns/dnsdist-19}
+    ports: ["853:853/tcp", "853:853/udp", "443:443/tcp"]
+    volumes: ["./dnsdist_v2.conf:/etc/dnsdist/dnsdist.conf:ro", "./certs:/certs:ro"]
+    networks: [a3e]
+  fl-coordinator:
+    build: {context: ../.., dockerfile: deployment/v2/Dockerfile.v2}
+    command: python experiments_v2/fl_coordinator_v2.py --clients 100 --rounds 100 --aggregator mad_geomed --dp-epsilon 0.68
+    environment: {A3E_SEED: "11"}
+    networks: [a3e]
+  qhe-analyzer:
+    build: {context: ../.., dockerfile: deployment/v2/Dockerfile.v2}
+    command: python experiments_v2/qhe_analyzer_v2.py --params ntt_n256
+    networks: [a3e]
+  prometheus: {image: prom/prometheus, volumes: ["./prometheus_v2.yml:/etc/prometheus/prometheus.yml:ro"], networks: [a3e]}
+  grafana: {image: grafana/grafana, ports: ["3000:3000"], networks: [a3e]}
+networks: {a3e: {driver: bridge}}

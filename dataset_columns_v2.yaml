@@ -1,0 +1,31 @@
+# Map Gen-C-DDD-2022 column names to the 16 common features. Edit the right-hand side to match your release.
+columns:
+  pkt_size_mean: pkt_size_mean
+  pkt_size_std: pkt_size_std
+  pkt_size_skew: pkt_size_skew
+  iat_mean_ms: iat_mean_ms
+  iat_std_ms: iat_std_ms
+  iat_skew: iat_skew
+  qname_entropy_bits: qname_entropy_bits
+  payload_entropy_bits: payload_entropy_bits
+  query_rate_per_s: query_rate_per_s
+  resp_to_query_ratio: resp_to_query_ratio
+  subdomain_len_mean: subdomain_len_mean
+  unique_name_ratio: unique_name_ratio
+  handshake_ms: handshake_ms
+  session_reuse_ratio: session_reuse_ratio
+  stream_count: stream_count
+  proto_anomaly_score: proto_anomaly_score
+label_column: label
+label_map:
+  benign: 0
+  malicious: 1
+  attack: 1
+protocol_column: protocol
+protocol_map:
+  doh: DoH
+  dot: DoT
+  doq: DoQ
+  DoH: DoH
+  DoT: DoT
+  DoQ: DoQ

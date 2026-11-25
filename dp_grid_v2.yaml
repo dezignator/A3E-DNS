@@ -1,0 +1,15 @@
+# Privacy sweep for open question Q2
+epsilons:
+- 0.3
+- 0.68
+- 0.7
+- 1
+- 2
+- 4
+- 8
+delta: 1.0e-05
+rounds: 100
+clients: 100
+accountants:
+- rdp_full_participation
+- rdp_poisson_subsampling

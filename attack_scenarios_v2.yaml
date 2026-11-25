@@ -1,0 +1,117 @@
+# Feature-level scenario definitions (units of benign scale at severity 1)
+variants:
+  baseline:
+    severity: 1.0
+    blend: 1.0
+  low_and_slow:
+    severity: 0.5
+    blend: 1.0
+  adaptive_blend:
+    severity: 1.0
+    blend: 0.6
+scenarios:
+  S1-Timing:
+    protocol: DoH
+    family: traffic_analysis
+    description: inter-arrival distribution drifts right-skewed under timing inference
+    shifts:
+      iat_mean_ms: 1.6
+      iat_skew: 2.4
+      iat_std_ms: 0.8
+  S2-Tunnel:
+    protocol: ALL
+    family: tunneling
+    description: high-entropy, long, mostly unique labels at a steady low rate
+    shifts:
+      qname_entropy_bits: 3.2
+      subdomain_len_mean: 3.4
+      unique_name_ratio: 3.0
+      pkt_size_std: -1.0
+      query_rate_per_s: 1.2
+  S4-Quantum:
+    protocol: DoH
+    family: protocol_exploit
+    description: handshake with non-negotiated or malformed PQ key-exchange parameters
+    shifts:
+      handshake_ms: 2.2
+      proto_anomaly_score: 4.0
+  S5-Evasion:
+    protocol: ALL
+    family: ml_evasion
+    description: tunnel traffic perturbed toward benign statistics
+    shifts:
+      qname_entropy_bits: 1.5
+      subdomain_len_mean: 1.4
+      unique_name_ratio: 1.4
+      pkt_size_std: -0.4
+  DoH-MUX:
+    protocol: DoH
+    family: stream_multiplexing
+    description: malicious queries hidden in one HTTP/2 stream among legitimate ones
+    shifts:
+      stream_count: 3.0
+      payload_entropy_bits: 1.4
+      pkt_size_std: 1.2
+  DoH-HDR:
+    protocol: DoH
+    family: header_manipulation
+    description: altered request headers and metadata
+    shifts:
+      proto_anomaly_score: 3.0
+      pkt_size_mean: 1.0
+      payload_entropy_bits: 0.8
+  DoH-RESUME:
+    protocol: DoH
+    family: session_reuse
+    description: long-lived resumed connection masking sustained malicious activity
+    shifts:
+      session_reuse_ratio: 2.6
+      iat_std_ms: -0.7
+      query_rate_per_s: 1.6
+  DoT-RENEG:
+    protocol: DoT
+    family: handshake_abuse
+    description: malformed handshake messages during renegotiation
+    shifts:
+      handshake_ms: 3.0
+      proto_anomaly_score: 4.5
+      session_reuse_ratio: -1.2
+  DoT-CERT:
+    protocol: DoT
+    family: certificate_abuse
+    description: inconsistent certificate chain during negotiation
+    shifts:
+      handshake_ms: 1.8
+      proto_anomaly_score: 3.5
+  DoT-TICKET:
+    protocol: DoT
+    family: session_ticket_abuse
+    description: altered session-ticket parameters
+    shifts:
+      session_reuse_ratio: 3.0
+      proto_anomaly_score: 2.4
+      handshake_ms: -0.8
+  DoQ-MIGRATE:
+    protocol: DoQ
+    family: connection_migration
+    description: modified connection IDs and changing client addresses
+    shifts:
+      session_reuse_ratio: -1.6
+      handshake_ms: 1.5
+      proto_anomaly_score: 3.2
+      stream_count: 1.0
+  DoQ-MUX:
+    protocol: DoQ
+    family: stream_multiplexing
+    description: payload split over many concurrent streams
+    shifts:
+      stream_count: 3.5
+      payload_entropy_bits: 1.2
+      query_rate_per_s: 1.4
+  DoQ-VERNEG:
+    protocol: DoQ
+    family: version_negotiation
+    description: version negotiation steered to legacy parameters
+    shifts:
+      proto_anomaly_score: 4.2
+      handshake_ms: 2.0

@@ -1,0 +1,7 @@
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements-v2.txt .
+RUN pip install --no-cache-dir -r requirements-v2.txt
+COPY src ./src
+COPY experiments_v2 ./experiments_v2
+ENV PYTHONPATH=/app/src

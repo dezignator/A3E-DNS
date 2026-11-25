@@ -1,0 +1,54 @@
+# Defaults for the v2 harness. Values follow Table 27; conflicting items are listed in docs/v2/08_consistency_audit.md
+aee:
+  window_packets: 1000
+  group: SE(3)^4
+  key_bits: 256
+  controller:
+    hidden:
+    - 64
+    - 64
+    int8: true
+    prune: 0.3
+  key_rotation_s: 10
+  entropy_threshold: 0.95
+  failover: chacha20
+  kl_threshold: 0.3
+qhe:
+  param_set: ntt_n256
+  sigma: 1.58
+  sampler: table_cdt
+  selective_features: 4
+  max_reporters_times_window: 255
+fl:
+  clients: 100
+  rounds: 100
+  aggregator: mad_geomed
+  clip: 2.0
+  dp:
+    mechanism: gaussian_rdp
+    epsilon: 0.68
+    delta: 1.0e-05
+  detector:
+    layers: 8
+    heads: 12
+    window: 512
+  pgd:
+    epsilon: 0.3
+    epochs: 50
+sandbox:
+  memory: 2GB
+  timeout_s: 30
+  replication: 3
+  gamma: 0.95
+intel:
+  stix_latency_budget_ms: 100
+  reputation:
+    vendorA: 0.9
+    vendorB: 0.9
+    stix-feed: 0.9
+seeds:
+- 11
+- 23
+- 37
+- 41
+- 59

@@ -1,0 +1,5 @@
+table_add classify set_proto 6 443 => 1
+table_add classify set_proto 6 853 => 2
+table_add classify set_proto 17 853 => 3
+table_add l3 fwd 10.0.2.0/24 => 2
+table_add l3 fwd 10.0.1.0/24 => 1

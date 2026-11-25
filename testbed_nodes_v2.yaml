@@ -1,0 +1,26 @@
+# Section 6.11.1
+nodes:
+- id: n1
+  role: resolver_frontend
+  cpu: Xeon Silver or EPYC
+  cores: 32
+  ram_gb: 128
+- id: n2
+  role: qhe_analyzer_sandbox
+  cores: 16
+  ram_gb: 128
+  gpu: NVIDIA A100 40GB (optional)
+- id: n3
+  role: fl_coordinator
+  cores: 16
+  ram_gb: 128
+- id: n4
+  role: clients_load
+  cores: 32
+  ram_gb: 128
+os: Ubuntu Server 22.04 LTS
+network_profiles:
+- lan
+- wan
+- wan_jitter
+- mobile

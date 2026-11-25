@@ -1,0 +1,59 @@
+# 2^3 factorial design; see docs/v2/06_evaluation_protocol.md
+factors:
+- AEE
+- QHE
+- FL
+configs:
+- id: C0
+  AEE: 0
+  QHE: 0
+  FL: 0
+- id: C1
+  AEE: 0
+  QHE: 0
+  FL: 1
+- id: C2
+  AEE: 0
+  QHE: 1
+  FL: 0
+- id: C3
+  AEE: 0
+  QHE: 1
+  FL: 1
+- id: C4
+  AEE: 1
+  QHE: 0
+  FL: 0
+- id: C5
+  AEE: 1
+  QHE: 0
+  FL: 1
+- id: C6
+  AEE: 1
+  QHE: 1
+  FL: 0
+- id: C7
+  AEE: 1
+  QHE: 1
+  FL: 1
+seeds:
+- 11
+- 23
+- 37
+- 41
+- 59
+- 61
+- 73
+- 89
+- 97
+- 101
+metrics:
+- f1
+- cds
+- fpr
+- p99_ms
+- qps
+- timing_adversary_auc
+- analyzer_view_auc
+- epsilon
+interaction_terms: true

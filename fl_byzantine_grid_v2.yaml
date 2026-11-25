@@ -1,0 +1,23 @@
+# Testbed Byzantine sweep (harness uses a reduced grid)
+fractions:
+- 0
+- 0.1
+- 0.2
+- 0.3
+- 0.4
+- 0.45
+attacks:
+- gradient_flip
+- label_flip
+- random_noise
+- scaled_update
+- free_rider
+- adaptive_under_mad
+aggregators:
+- mean
+- median
+- trimmed
+- geomed
+- mad_geomed
+clients: 100
+rounds: 100
