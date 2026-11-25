@@ -1,0 +1,2 @@
+keys,unique_keys,mean_hamming_consecutive,sd_hamming,ideal_hamming,monobit_dev,runs_z,shannon_bits_per_byte,min_entropy_bits_per_byte,mean_cadence_s,min_cadence_s,max_cadence_s
+3000,3000,128.03501167055686,8.129768691124465,128,6.901041666668162e-05,-1.2894301874600784,7.998332669463056,7.805912947883698,10.36110579448985,5.003611242864281,14.993831056635827

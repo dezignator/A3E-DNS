@@ -1,0 +1,3 @@
+method,ms,agree
+numpy convolution,0.038888350000831906,True
+pure-Python NTT,1.3316843333370798,True

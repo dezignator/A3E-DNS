@@ -1,0 +1,2 @@
+trials,reporters,window,exact_match_rate,auc_chi2_plain,auc_chi2_decrypted_aggregate,auc_ciphertext_only_adversary,enc_ms_per_report,add_ms_per_aggregate,dec_ms_per_aggregate
+150,10,25,1.0,1.0,1.0,0.4864864864864865,0.150572562666639,0.042953453333893776,0.05491090666888946

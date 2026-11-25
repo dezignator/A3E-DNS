@@ -1,0 +1,5 @@
+policy,mean_discounted_cost,p_contained_within_40
+optimal,0.6198311722117485,0.9985
+always_allow,30.077183331811852,0.98725
+always_terminate,1.0,1.0
+monitor_only,38.58933694839966,0.9265

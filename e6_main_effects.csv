@@ -1,0 +1,3 @@
+component,metric,on,off,welch_p,cohens_d
+FL (robust aggregation vs local-only),f1 under 20% gradient-flip clients,0.8842902341499258,0.8189200979737938,0.00027889313218154165,3.9206248289569268
+Robust aggregation vs plain mean,f1 under 20% gradient-flip clients,0.8842902341499258,0.8160638795099004,0.00018344152926472724,4.155529189878319

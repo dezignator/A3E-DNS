@@ -1,0 +1,4 @@
+protocol,isolate,terminate
+DoH,HTTP/2 stream isolation,RST_STREAM + connection drain
+DoT,TLS session quarantine,close_notify then TCP RST
+DoQ,QUIC connection pinning,CONNECTION_CLOSE with application error

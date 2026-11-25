@@ -1,0 +1,11 @@
+model,blend,detection_rate
+pgd_trained,0.2,0.176
+pgd_trained,0.4,0.6439999999999999
+pgd_trained,0.6,0.966
+pgd_trained,0.8,0.9970000000000001
+pgd_trained,1.0,1.0
+standard,0.2,0.27199999999999996
+standard,0.4,0.6975
+standard,0.6,0.9695
+standard,0.8,0.9964999999999999
+standard,1.0,0.9995
