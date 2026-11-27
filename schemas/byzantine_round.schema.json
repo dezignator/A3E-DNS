@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dezignator/A3E-DNS/schemas/byzantine_round.schema.json",
+  "title": "Byzantine attack round",
+  "description": "One round of the E2 Byzantine sweep, produced by byzantine_attack_simulator.py. Each round records the attack magnitudes per client and the aggregate attack-to-reference ratio, which the S2 table generator aggregates across rounds.",
+  "type": "object",
+  "required": [
+    "round", "n_active_byzantine", "per_client_magnitude",
+    "per_client_l2_norm", "reference_norm", "aggregate_l2_norm",
+    "attack_to_reference_ratio"
+  ],
+  "properties": {
+    "round": {"type": "integer", "minimum": 0},
+    "n_active_byzantine": {"type": "integer", "minimum": 0},
+    "per_client_magnitude": {
+      "type": "object",
+      "additionalProperties": {"type": "number", "minimum": 0}
+    },
+    "per_client_l2_norm": {
+      "type": "object",
+      "additionalProperties": {"type": "number", "minimum": 0}
+    },
+    "reference_norm": {"type": "number", "minimum": 0},
+    "aggregate_l2_norm": {"type": "number", "minimum": 0},
+    "attack_to_reference_ratio": {"type": "number", "minimum": 0}
+  },
+  "additionalProperties": false
+}
