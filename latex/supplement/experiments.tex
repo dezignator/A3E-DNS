@@ -1,0 +1,201 @@
+% latex/supplement/experiments.tex
+%
+% Descriptions of the ten experiments. For each experiment the
+% supplement records the purpose, the inputs, the artefact paths, and
+% the thesis table the results feed. A reviewer running the pipeline
+% should be able to identify every output directory mentioned here
+% by name.
+
+\section{Experiment descriptions}
+
+This section documents the ten experiments the A3E-DNS evaluation
+reports. Each experiment is a standalone Python script under
+\texttt{experiments\_v2/}, and each is invoked by the orchestrator in
+\texttt{extended\_experimentation/experiments/e1\_e10\_orchestrator.py}.
+The descriptions below follow the order the orchestrator runs them in.
+
+\subsection{E1 --- Attack scenario catalogue}
+
+\textbf{Purpose.} Produce the ten-scenario attack catalogue with
+three severity variants per scenario and three protocols per scenario,
+plus a benign baseline.
+
+\textbf{Inputs.} None; the catalogue is fully synthetic, parameterised
+by the seed.
+
+\textbf{Outputs.}
+\begin{itemize}
+\item \texttt{runs/experiments/E1/scenario\_sweep.json} — per-scenario
+      accuracy, FPR, precision, recall.
+\item \texttt{runs/experiments/E1/predictions.jsonl} — per-window
+      predictions.
+\item \texttt{runs/experiments/E1/manifest.json} — the run manifest.
+\end{itemize}
+
+\textbf{Feeds.} Table 30 (scenario breakdown), Table 38 (adversarial
+robustness), Table 39 (statistical significance).
+
+\subsection{E2 --- Byzantine robustness sweep}
+
+\textbf{Purpose.} Sweep the Byzantine fraction from $5\%$ to $40\%$
+across the eight attack strategies and the four schedules.
+
+\textbf{Inputs.} The E1 predictions (as the honest baseline).
+
+\textbf{Outputs.}
+\begin{itemize}
+\item \texttt{runs/experiments/E2/byzantine\_sweep.json} — per-round
+      attack ratios and aggregate accuracies.
+\item \texttt{runs/experiments/E2/manifest.json}.
+\end{itemize}
+
+\textbf{Feeds.} Table 31 (Byzantine robustness). The
+\texttt{attack\_to\_reference\_ratio} at each fraction is what the
+robustness figure plots.
+
+\subsection{E3 --- Differential-privacy sweep}
+
+\textbf{Purpose.} Sweep the target $\eps$ from $0.1$ to $1.0$ and
+measure the utility loss at each value.
+
+\textbf{Inputs.} The E1 predictions.
+
+\textbf{Outputs.}
+\begin{itemize}
+\item \texttt{runs/experiments/E3/dp\_sweep.json} — per-$\eps$
+      accuracy and FPR.
+\item \texttt{runs/experiments/E3/manifest.json}.
+\end{itemize}
+
+\textbf{Feeds.} Table 32 (DP epsilon sweep). The reported
+$\eps = 0.68$ is the point at which the utility loss first crosses
+$0.5\%$, which the sweep identifies from the data rather than from a
+pre-set threshold.
+
+\subsection{E4a--E4d --- QHE primitives}
+
+\textbf{Purpose.} Four separate benchmarks of the homomorphic
+encryption primitives:
+
+\begin{itemize}
+\item E4a: negacyclic NTT vs.\ naive polynomial multiplication;
+\item E4b: CDT Gaussian sampler correctness and timing;
+\item E4c: selective homomorphic operations over the informative
+      feature subset;
+\item E4d: packed ciphertext size and compression ratio.
+\end{itemize}
+
+\textbf{Inputs.} All four are self-contained; none depends on the
+attack catalogue.
+
+\textbf{Outputs.} Four JSON manifests under
+\texttt{runs/experiments/E4a/} through \texttt{E4d/}.
+
+\textbf{Feeds.} Tables 33 and 34.
+
+\subsection{E5 --- End-to-end P99 latency}
+
+\textbf{Purpose.} Measure the P99 latency of the full pipeline under
+combined attack load.
+
+\textbf{Inputs.} The E2 and E3 artefacts, replayed through the
+pipeline.
+
+\textbf{Outputs.}
+\begin{itemize}
+\item \texttt{runs/experiments/E5/latency.json} — per-protocol P50,
+      P95, P99, P99.9.
+\item \texttt{runs/experiments/E5/manifest.json}.
+\end{itemize}
+
+\textbf{Feeds.} Table 35 (P99 latency). The reported
+$1.42\,\mathrm{ms}$ is the P99 over the DoH, DoT and DoQ streams
+pooled; the per-protocol values are in the same table as a
+footnote.
+
+\subsection{E6 --- Peak throughput}
+
+\textbf{Purpose.} Measure peak QPS at concurrency levels from 1 to
+128.
+
+\textbf{Inputs.} The E5 pipeline configuration.
+
+\textbf{Outputs.}
+\begin{itemize}
+\item \texttt{runs/experiments/E6/throughput.json} — per-concurrency
+      QPS.
+\item \texttt{runs/experiments/E6/manifest.json}.
+\end{itemize}
+
+\textbf{Feeds.} Table 35 (peak throughput). The reported
+$22.5\,\mathrm{M}\,\mathrm{QPS}$ is the maximum over the sweep,
+measured at concurrency $= 32$.
+
+\subsection{E7 --- Component ablation}
+
+\textbf{Purpose.} Ablate each of AEE, QHE, FL and the attention block
+in turn, and measure the resulting accuracy, FPR and P99.
+
+\textbf{Inputs.} Pre-computed checkpoints for the four ablated
+variants, produced by re-running the training pipeline with the
+corresponding component disabled.
+
+\textbf{Outputs.}
+\begin{itemize}
+\item \texttt{runs/experiments/E7/ablation.json}.
+\item \texttt{runs/experiments/E7/manifest.json}.
+\end{itemize}
+
+\textbf{Feeds.} Table 36. The ablation is \emph{partial}: a full
+factorial design was not performed, as Section~6.7.3 of the thesis
+states.
+
+\subsection{E8 --- Multi-protocol accuracy}
+
+\textbf{Purpose.} Confirm the detector generalises across DoH, DoT
+and DoQ.
+
+\textbf{Inputs.} The E1 catalogue, stratified by protocol.
+
+\textbf{Outputs.}
+\begin{itemize}
+\item \texttt{runs/experiments/E8/multi\_protocol.json}.
+\item \texttt{runs/experiments/E8/manifest.json}.
+\end{itemize}
+
+\textbf{Feeds.} Table 37.
+
+\subsection{E9 --- Adversarial robustness}
+
+\textbf{Purpose.} Measure the accuracy drop under the adaptive-blend
+variant of each scenario, relative to the baseline severity.
+
+\textbf{Inputs.} The E1 and E2 predictions.
+
+\textbf{Outputs.}
+\begin{itemize}
+\item \texttt{runs/experiments/E9/adversarial\_robustness.json}.
+\item \texttt{runs/experiments/E9/manifest.json}.
+\end{itemize}
+
+\textbf{Feeds.} Table 38. The reported $96.5\%$ robustness is the
+ratio of adaptive-blend accuracy to baseline accuracy, not the raw
+accuracy itself.
+
+\subsection{E10 --- Statistical significance}
+
+\textbf{Purpose.} Run the four significance tests (paired bootstrap,
+Wilcoxon signed-rank, permutation, Friedman) over the E1--E9
+artefacts.
+
+\textbf{Inputs.} The E1, E2, E3, E5, E6, E7, E8 and E9 manifests and
+prediction files.
+
+\textbf{Outputs.}
+\begin{itemize}
+\item \texttt{runs/experiments/E10/statistical\_analysis.json}.
+\item \texttt{runs/experiments/E10/significance\_table.tex}.
+\end{itemize}
+
+\textbf{Feeds.} Table 39. E10 depends on every other experiment, so
+it is the last node in the orchestrator's DAG.
