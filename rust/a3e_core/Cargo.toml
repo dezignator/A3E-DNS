@@ -1,0 +1,31 @@
+# rust/a3e_core/Cargo.toml
+#
+# Rust implementation of the A3E-DNS cryptographic primitives. This crate
+# provides the negacyclic NTT, the CDT Gaussian sampler and the SE(3)
+# exponential map that the Python pipeline in extended_experimentation.qhe
+# and extended_experimentation.aee reference. Building with --features
+# python produces a Python extension module that exposes the same API to
+# the pipeline at runtime; building without the feature produces a
+# pure-Rust library that can be consumed directly and cross-checked
+# against the NumPy implementations.
+
+[package]
+name = "a3e_core"
+version = "0.1.0"
+edition = "2021"
+authors = ["A3E-DNS Extended Suite"]
+description = "Rust implementation of A3E-DNS cryptographic primitives"
+license = "MIT"
+repository = "https://github.com/dezignator/A3E-DNS"
+rust-version = "1.75"
+
+[lib]
+name = "a3e_core"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+python = ["dep:pyo3"]
+
+[dependencies]
+pyo3 = { version = "0.20", features = ["extension-module"], optional = true }
