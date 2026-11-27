@@ -1,0 +1,92 @@
+# extended_experimentation/config/a3e_experiment_config.yaml
+#
+# Consolidated configuration for the A3E-DNS extended experimentation
+# suite. Each section corresponds to one pipeline stage; the values here
+# match the hyperparameter registries in the individual modules. Where a
+# section lists a value that is also a module-level default, the value
+# here is the one the pipeline was actually run with.
+
+seed: 20231130
+
+catalogue:
+  benign_windows_per_protocol: 2000
+  attack_windows_per_scenario_variant: 500
+  window_size_packets: 32
+  protocols: [doh, dot, doq]
+
+byzantine:
+  n_clients: 20
+  n_rounds: 10
+  base_magnitude: 2.5
+  sweep_fractions: [0.05, 0.10, 0.20, 0.30, 0.40]
+  strategies:
+    - sign_flip
+    - gaussian
+    - label_flip
+    - inner_product
+    - krum_targeted
+    - alie
+    - trim_attack
+    - adaptive_mimicry
+
+fl:
+  n_clients: 20
+  byzantine_fraction: 0.20
+  n_rounds: 10
+  local_epochs: 2
+  batch_size: 32
+  aggregator: trimmed_mean
+
+dp:
+  target_epsilon: 0.68
+  target_delta: 1.0e-5
+  clip_norm: 1.0
+  noise_multiplier: 1.1
+  n_rounds: 10
+
+aee:
+  volatility_floor: 0.05
+  diffusion_scale: 0.12
+  drift_scale: -0.02
+  morph_threshold: 0.55
+  min_dwell_steps: 4
+  max_dwell_steps: 64
+
+qhe:
+  modulus: 8380417
+  n: 256
+  sampler_sigma: 3.2
+  sampler_tail: 6.0
+  informative_threshold: 0.35
+  max_selected_features: 8
+  compression_ratio: 8.0
+
+evaluation:
+  bootstrap_resamples: 10000
+  permutation_resamples: 10000
+  alpha: 0.05
+  tolerance:
+    detection_accuracy: [0.9990, 0.9998]
+    false_positive_rate_fraction: [0.0012, 0.0022]
+    p99_latency_ms: [1.20, 1.70]
+    adversarial_robustness: [0.945, 0.985]
+    differential_privacy_epsilon: [0.60, 0.76]
+    peak_throughput_qps: [20000000.0, 25000000.0]
+
+ablation:
+  variants: [full, no_aee, no_qhe, no_fl, no_attention]
+  thresholds:
+    accuracy_drop: 0.002
+    fpr_increase: 0.0005
+    p99_increase_ms: 0.20
+
+pipeline:
+  latency_budget_ms: 1.42
+  latency_window: 4096
+  strict_attestation: false
+  strict_aee: false
+
+orchestrator:
+  parallel: true
+  max_workers: 4
+  resume: false
