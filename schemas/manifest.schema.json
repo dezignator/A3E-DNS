@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dezignator/A3E-DNS/schemas/manifest.schema.json",
+  "title": "A3E-DNS manifest envelope",
+  "description": "The envelope every manifest produced by the extended suite conforms to. Module-specific manifests extend this via allOf and add their own properties.",
+  "type": "object",
+  "required": ["module"],
+  "properties": {
+    "module": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The fully-qualified Python module path that produced the manifest."
+    },
+    "manifest_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 over the JSON payload with this field excluded. The evaluator verifies it; the ingestion helper uses it as the run_id basis."
+    },
+    "thesis_reference": {
+      "type": "object",
+      "description": "The thesis claim the manifest supports, in the same shape across all modules.",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when the manifest was written. Optional; older manifests predating this field are still valid."
+    },
+    "seed": {
+      "type": "integer",
+      "description": "The RNG seed the producing module used. Required for reproducibility."
+    },
+    "config": {
+      "type": "object",
+      "description": "The module's configuration snapshot at the time of the run."
+    }
+  },
+  "additionalProperties": true
+}
