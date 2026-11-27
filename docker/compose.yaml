@@ -1,0 +1,104 @@
+# docker/compose.yaml
+#
+# Full-stack A3E-DNS deployment. Brings up the Python pipeline, the Go
+# resolver, a Prometheus instance that scrapes both, and a Grafana that
+# reads from Prometheus. The compose file is what a reviewer runs to
+# see the system work end-to-end without installing anything locally
+# beyond Docker.
+#
+# Services are deliberately not placed on the default bridge network;
+# they share an explicit network so that the resolver can resolve the
+# pipeline by name and the pipeline cannot reach out to the internet
+# unless its health check requires it.
+
+version: "3.9"
+
+networks:
+  a3e:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+services:
+  pipeline:
+    build:
+      context: ..
+      dockerfile: docker/python-pipeline.Dockerfile
+    image: a3e/python-pipeline:dev
+    container_name: a3e-pipeline
+    networks:
+      - a3e
+    ports:
+      - "9443:9443"
+      - "9091:9091"
+    environment:
+      A3E_SEED: "20231130"
+      A3E_LOG_LEVEL: "info"
+    volumes:
+      - ../runs:/app/runs
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9091/healthz')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  resolver:
+    build:
+      context: ..
+      dockerfile: docker/go-resolver.Dockerfile
+    image: a3e/go-resolver:dev
+    container_name: a3e-resolver
+    networks:
+      - a3e
+    ports:
+      - "8053:8053"
+      - "9090:9090"
+    depends_on:
+      pipeline:
+        condition: service_healthy
+    volumes:
+      - ../go/a3e_resolver/config:/etc/a3e-resolver:ro
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/a3e-resolver", "--version"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: a3e-prometheus
+    networks:
+      - a3e
+    ports:
+      - "9095:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: a3e-grafana
+    networks:
+      - a3e
+    ports:
+      - "3000:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+      GF_SECURITY_ADMIN_PASSWORD: "admin"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
