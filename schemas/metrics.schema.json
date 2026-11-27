@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dezignator/A3E-DNS/schemas/metrics.schema.json",
+  "title": "Evaluation metrics manifest",
+  "description": "The shape of core_metrics.json and every manifest that carries a confusion matrix plus latency percentiles. Tolerances and thesis reference values live alongside the computed values so that a reviewer can check a manifest without opening the evaluator's source.",
+  "type": "object",
+  "required": ["metrics"],
+  "properties": {
+    "metrics": {
+      "type": "object",
+      "required": [
+        "detection_accuracy",
+        "false_positive_rate_fraction"
+      ],
+      "properties": {
+        "detection_accuracy": {
+          "type": "number", "minimum": 0.0, "maximum": 1.0,
+          "description": "True positives plus true negatives over the total."
+        },
+        "false_positive_rate_fraction": {
+          "type": "number", "minimum": 0.0, "maximum": 1.0,
+          "description": "False positives over benign samples, as a fraction (0.0017 = 0.17 %)."
+        },
+        "false_negative_rate_fraction": {
+          "type": "number", "minimum": 0.0, "maximum": 1.0
+        },
+        "precision": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "recall":    {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "f1":        {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "median_inference_latency_us": {"type": "number", "minimum": 0},
+        "p95_inference_latency_us":    {"type": "number", "minimum": 0},
+        "p99_inference_latency_us":    {"type": "number", "minimum": 0},
+        "p99_latency_ms":              {"type": "number", "minimum": 0},
+        "mean_inference_latency_us":   {"type": "number", "minimum": 0},
+        "throughput_qps":              {"type": "number", "minimum": 0},
+        "peak_throughput_qps":         {"type": "number", "minimum": 0},
+        "cryptographic_adaptation_ms": {"type": "number", "minimum": 0},
+        "adversarial_robustness":      {"type": "number", "minimum": 0, "maximum": 1},
+        "differential_privacy_epsilon":{"type": "number", "minimum": 0}
+      },
+      "additionalProperties": {"type": "number"}
+    },
+    "confusion": {
+      "type": "object",
+      "required": ["tp", "fp", "tn", "fn"],
+      "properties": {
+        "tp": {"type": "integer", "minimum": 0},
+        "fp": {"type": "integer", "minimum": 0},
+        "tn": {"type": "integer", "minimum": 0},
+        "fn": {"type": "integer", "minimum": 0},
+        "n":  {"type": "integer", "minimum": 0},
+        "accuracy":  {"type": "number", "minimum": 0, "maximum": 1},
+        "fpr":       {"type": "number", "minimum": 0, "maximum": 1},
+        "fnr":       {"type": "number", "minimum": 0, "maximum": 1},
+        "precision": {"type": "number", "minimum": 0, "maximum": 1},
+        "recall":    {"type": "number", "minimum": 0, "maximum": 1},
+        "f1":        {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "latency": {
+      "type": "object",
+      "properties": {
+        "n":        {"type": "integer", "minimum": 0},
+        "median_us":{"type": "number", "minimum": 0},
+        "mean_us":  {"type": "number", "minimum": 0},
+        "p95_us":   {"type": "number", "minimum": 0},
+        "p99_us":   {"type": "number", "minimum": 0},
+        "min_us":   {"type": "number", "minimum": 0},
+        "max_us":   {"type": "number", "minimum": 0}
+      }
+    },
+    "by_protocol": {
+      "type": "object",
+      "patternProperties": {
+        "^(doh|dot|doq)$": {
+          "type": "object",
+          "properties": {
+            "protocol": {"type": "string"},
+            "confusion": {"type": "object"},
+            "latency":   {"type": "object"}
+          }
+        }
+      }
+    },
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string", "enum": ["passed", "failed", "skipped"]},
+          "value":  {"type": "number"},
+          "tolerance": {
+            "type": "array", "minItems": 2, "maxItems": 2,
+            "items": {"type": "number"}
+          },
+          "deviation": {"type": "number"},
+          "reason": {"type": "string"}
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}
