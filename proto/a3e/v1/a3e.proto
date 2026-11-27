@@ -1,0 +1,229 @@
+// proto/a3e/v1/a3e.proto
+//
+// Wire contract between the Go resolver and the Python A3E-DNS pipeline.
+//
+// We defined the contract in protobuf rather than as ad-hoc JSON because
+// the deployment topology has multiple resolvers consuming a single
+// pipeline, and the pipeline's response latencies are on the critical
+// path of every DNS query. Protobuf's fixed-width encoding keeps the
+// per-query wire cost under 200 bytes even with attestation, which the
+// JSON equivalent could not guarantee.
+//
+// The schema follows the same versioning discipline as the rest of the
+// repository: every breaking change bumps the package version
+// (a3e.v1 -> a3e.v2), and the resolver is expected to negotiate the
+// version through the standard gRPC mechanism at connection setup.
+
+syntax = "proto3";
+
+package a3e.v1;
+
+option go_package = "github.com/dezignator/A3E-DNS/go/a3e_resolver/internal/api/pb;a3epb";
+option java_multiple_files = true;
+option java_package = "io.github.dezignator.a3e.v1";
+option csharp_namespace = "A3E.V1";
+
+// The A3E-DNS service.
+//
+// The service is instantiated once per resolver instance and multiplexed
+// across all transport workers over a single HTTP/2 connection. That
+// was deliberate: opening a fresh connection per query would have
+// doubled the P99 latency, because the QUIC/TLS handshake on the
+// pipeline side is the dominant cost for short-lived requests.
+service A3EService {
+  // Classify a single window.
+  //
+  // This is the hot path. It returns a decision, a confidence, and
+  // (when attestation is enabled) a homomorphic attestation handle.
+  rpc Classify(ClassifyRequest) returns (ClassifyResponse);
+
+  // Classify a batch of windows.
+  //
+  // The transport worker calls this when the local queue has accumulated
+  // more than the batch threshold; the pipeline processes the batch as
+  // a single forward pass, which amortises the per-request overhead.
+  rpc ClassifyBatch(ClassifyBatchRequest) returns (ClassifyBatchResponse);
+
+  // Fetch the current AEE state.
+  //
+  // The resolver uses this to correlate morph decisions across
+  // transport workers; the state is also exposed to the dashboard.
+  rpc GetAEEState(GetAEEStateRequest) returns (GetAEEStateResponse);
+
+  // Health and readiness.
+  //
+  // Standard gRPC health checking is also wired up, but this custom
+  // method carries pipeline-specific diagnostics that the standard
+  // health check does not express.
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+// A single feature window.
+//
+// The sixteen features are laid out in the field order that
+// FEATURE_NAMES defines in a3e_attack_catalogue.py. That ordering is
+// load-bearing: the pipeline flattens the window into a contiguous
+// buffer before inference, and a reordering of the fields would
+// silently corrupt the classification without any wire-level error.
+message FeatureWindow {
+  double iat_mean_ms = 1;
+  double iat_std_ms = 2;
+  double iat_skew = 3;
+  double pkt_size_mean = 4;
+  double pkt_size_std = 5;
+  double qname_entropy_bits = 6;
+  double subdomain_len_mean = 7;
+  double unique_name_ratio = 8;
+  double query_rate_per_s = 9;
+  double stream_count = 10;
+  double payload_entropy_bits = 11;
+  double handshake_ms = 12;
+  double proto_anomaly_score = 13;
+  double response_size_mean = 14;
+  double ttl_mean_s = 15;
+  double direction_ratio = 16;
+}
+
+// Transport protocol carrying the query.
+enum Protocol {
+  PROTOCOL_UNSPECIFIED = 0;
+  PROTOCOL_DOH = 1;
+  PROTOCOL_DOT = 2;
+  PROTOCOL_DOQ = 3;
+}
+
+// The classification decision.
+enum Decision {
+  DECISION_UNSPECIFIED = 0;
+  DECISION_BENIGN = 1;
+  DECISION_ATTACK = 2;
+}
+
+// Request metadata.
+//
+// The resolver attaches a query identifier so that the pipeline's logs
+// and metrics can be joined against the resolver's own per-query log
+// without needing a distributed trace.
+message RequestContext {
+  string resolver_id = 1;
+  string worker_id = 2;
+  string query_id = 3;
+  Protocol protocol = 4;
+  int64 received_at_unix_nanos = 5;
+}
+
+// Single-window classify.
+message ClassifyRequest {
+  RequestContext context = 1;
+  FeatureWindow window = 2;
+  // Whether the caller wants the QHE attestation handle in the response.
+  // Set to false for the liveness probes and for the dashboard's
+  // backfill queries, where the attestation is not consulted.
+  bool request_attestation = 3;
+}
+
+// The attestation handle.
+//
+// The bytes are opaque to the resolver. The pipeline produces them and
+// the dashboard / audit log consumes them; the resolver only forwards
+// them. That indirection exists so that a future change to the
+// attestation scheme (STARK -> SNARK, for example) does not require a
+// resolver upgrade.
+message AttestationHandle {
+  bytes handle = 1;
+  // An attestation outcome.
+  enum Outcome {
+    OUTCOME_UNSPECIFIED = 0;
+    OUTCOME_VERIFIED = 1;
+    OUTCOME_FAILED = 2;
+    OUTCOME_SKIPPED = 3;
+  }
+  Outcome outcome = 2;
+}
+
+// The AEE morph decision for this query.
+enum MorphOutcome {
+  MORPH_OUTCOME_UNSPECIFIED = 0;
+  MORPH_OUTCOME_NO_CHANGE = 1;
+  MORPH_OUTCOME_MORPHED = 2;
+  MORPH_OUTCOME_SUPPRESSED = 3;
+  MORPH_OUTCOME_DISABLED = 4;
+}
+
+// Single-window classify response.
+message ClassifyResponse {
+  Decision decision = 1;
+  double confidence = 2;
+  AttestationHandle attestation = 3;
+  MorphOutcome morph = 4;
+  // Total pipeline-internal elapsed time, in nanoseconds. The resolver
+  // uses this for its own SLO tracking; it excludes the network round
+  // trip.
+  int64 elapsed_ns = 5;
+  // Whether the request violated the pipeline's internal latency
+  // budget. The resolver uses this to shed load when the violation
+  // rate crosses its threshold.
+  bool budget_violated = 6;
+}
+
+// Batched classify request.
+message ClassifyBatchRequest {
+  RequestContext context = 1;
+  repeated FeatureWindow windows = 2;
+  bool request_attestation = 3;
+}
+
+// Batched classify response.
+//
+// The order of `responses` matches the order of `windows` in the
+// corresponding request; the resolver relies on this and does not
+// include per-item IDs.
+message ClassifyBatchResponse {
+  repeated ClassifyResponse responses = 1;
+  int64 elapsed_ns = 2;
+}
+
+// AEE state query.
+message GetAEEStateRequest {
+  RequestContext context = 1;
+}
+
+// The AEE state snapshot.
+//
+// The six `xi` components are the current SE(3) Lie algebra state. The
+// `step` is the number of evolution steps taken since the resolver
+// started; the `last_morph_step` is the step at which the last morph
+// decision fired. Those two values give the dashboard enough
+// information to render the morph history without polling the
+// pipeline's internal state.
+message GetAEEStateResponse {
+  repeated double xi = 1;
+  uint64 step = 2;
+  uint64 last_morph_step = 3;
+  double current_volatility = 4;
+  string policy_provenance = 5;
+}
+
+// Health check.
+message HealthRequest {}
+
+// Health response.
+message HealthResponse {
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_SERVING = 1;
+    STATUS_DEGRADED = 2;
+    STATUS_NOT_SERVING = 3;
+  }
+  Status status = 1;
+  string version = 2;
+  // A monotonic counter of completed queries, used by the resolver to
+  // detect pipeline restarts.
+  uint64 queries_served = 3;
+  // The current rolling P99 latency estimate, in nanoseconds.
+  int64 rolling_p99_ns = 4;
+  // Whether the attestation subsystem is up.
+  bool attestation_ready = 5;
+  // Whether the AEE subsystem is up.
+  bool aee_ready = 6;
+}
