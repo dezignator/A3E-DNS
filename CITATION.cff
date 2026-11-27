@@ -1,0 +1,21 @@
+
+---
+
+## `CITATION.cff` (repository root, or copy under `extended_experimentation/`)
+
+```yaml
+cff-version: 1.2.0
+title: "A3E-DNS extended experimentation suite"
+message: "If you use this code, please cite the accompanying thesis."
+type: software
+authors:
+  - family-names: "[REDACTED FOR BLIND REVIEW]"
+    given-names: "[REDACTED FOR BLIND REVIEW]"
+repository-code: "https://github.com/dezignator/A3E-DNS"
+license: "MIT"
+version: "0.3.1"
+date-released: "2026-11-30"
+preferred-citation:
+  type: thesis
+  title: "Next-Generation Secure Encrypted DNS Architectures: Four Complementary Frameworks for Adaptive, Privacy-Preserving, and Quantum-Resilient Defense"
+  year: 2026
