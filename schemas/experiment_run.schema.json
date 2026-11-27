@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dezignator/A3E-DNS/schemas/experiment_run.schema.json",
+  "title": "Experiment run record",
+  "description": "One entry in the e1_e10_orchestrator's state file, and the same shape the SQL ingestion helper reads. This is the record a reviewer consults to see which experiment produced which artefact.",
+  "type": "object",
+  "required": ["experiment_id", "status", "started_at", "finished_at"],
+  "properties": {
+    "experiment_id": {"type": "string", "pattern": "^E[0-9]+[a-d]?$"},
+    "status": {
+      "type": "string",
+      "enum": ["pending", "running", "completed", "cached",
+               "failed", "skipped", "timeout"]
+    },
+    "started_at":  {"type": "number"},
+    "finished_at": {"type": "number"},
+    "elapsed_s":   {"type": "number", "minimum": 0},
+    "return_code": {"type": ["integer", "null"]},
+    "stdout_tail": {"type": "string"},
+    "stderr_tail": {"type": "string"},
+    "artefact_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "error": {"type": ["string", "null"]}
+  },
+  "additionalProperties": false
+}
