@@ -1,0 +1,53 @@
+// proto/a3e/v1/pipeline.proto
+//
+// Internal pipeline messages.
+//
+// These are used between the pipeline's own subsystems (detector, QHE,
+// AEE) and are not exposed to the resolver. They live in a separate
+// file so that the public contract (a3e.proto) stays minimal; an
+// operator reading the public schema sees only what they need to
+// implement a resolver.
+
+syntax = "proto3";
+
+package a3e.v1.internal;
+
+option go_package = "github.com/dezignator/A3E-DNS/go/a3e_resolver/internal/api/pb;a3epb";
+
+// Detector output.
+message DetectionResult {
+  int32 label = 1;         // 0 benign, 1 attack
+  double confidence = 2;
+  // Per-feature contribution. Optional; populated only when the
+  // detector is configured for explainability, which it is in the
+  // development profile but not the production profile.
+  repeated double feature_contributions = 3;
+}
+
+// QHE attestation request / response.
+message AttestationRequest {
+  repeated double values = 1;
+  repeated int32 selected_indices = 2;
+}
+
+message AttestationResult {
+  repeated double recovered = 1;
+  repeated int32 selected_indices = 2;
+  double max_abs_error = 3;
+  bool verified = 4;
+}
+
+// AEE state update.
+message AEEUpdate {
+  double kl_divergence = 1;
+  double entropy_bits = 2;
+  double severity = 3;
+}
+
+message AEEState {
+  repeated double xi = 1;
+  uint64 step = 2;
+  uint64 last_morph_step = 3;
+  double volatility = 4;
+  bool should_morph = 5;
+}
