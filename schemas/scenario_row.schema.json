@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/dezignator/A3E-DNS/schemas/scenario_row.schema.json",
+  "title": "Attack catalogue scenario row",
+  "description": "One row of the attack catalogue produced by a3e_attack_catalogue.py. The sixteen features appear in the same order as FEATURE_NAMES; downstream consumers rely on that ordering.",
+  "type": "object",
+  "required": [
+    "flow_id", "window_id", "protocol", "variant", "label", "severity",
+    "iat_mean_ms", "iat_std_ms", "iat_skew",
+    "pkt_size_mean", "pkt_size_std",
+    "qname_entropy_bits", "subdomain_len_mean", "unique_name_ratio",
+    "query_rate_per_s", "stream_count",
+    "payload_entropy_bits", "handshake_ms",
+    "proto_anomaly_score", "response_size_mean",
+    "ttl_mean_s", "direction_ratio"
+  ],
+  "properties": {
+    "flow_id":       {"type": "string", "minLength": 1},
+    "window_id":     {"type": "string", "minLength": 1},
+    "scenario_id":   {"type": ["string", "null"]},
+    "family":        {
+      "type": ["string", "null"],
+      "enum": [null, "timing", "tunnel", "quantum", "evasion", "stream_mux",
+               "beacon", "fragmentation", "padding_abuse", "cache_poison",
+               "side_channel"]
+    },
+    "protocol": {"type": "string", "enum": ["doh", "dot", "doq"]},
+    "variant":  {"type": "string", "enum": ["benign", "baseline", "low_and_slow", "adaptive_blend"]},
+    "label":    {"type": "integer", "enum": [0, 1]},
+    "severity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+
+    "iat_mean_ms":         {"type": "number", "minimum": 0},
+    "iat_std_ms":          {"type": "number", "minimum": 0},
+    "iat_skew":            {"type": "number"},
+    "pkt_size_mean":       {"type": "number", "minimum": 0},
+    "pkt_size_std":        {"type": "number", "minimum": 0},
+    "qname_entropy_bits":  {"type": "number", "minimum": 0},
+    "subdomain_len_mean":  {"type": "number", "minimum": 0},
+    "unique_name_ratio":   {"type": "number", "minimum": 0, "maximum": 1},
+    "query_rate_per_s":    {"type": "number", "minimum": 0},
+    "stream_count":        {"type": "number", "minimum": 0},
+    "payload_entropy_bits":{"type": "number", "minimum": 0},
+    "handshake_ms":        {"type": "number", "minimum": 0},
+    "proto_anomaly_score": {"type": "number", "minimum": 0},
+    "response_size_mean":  {"type": "number", "minimum": 0},
+    "ttl_mean_s":          {"type": "number", "minimum": 0},
+    "direction_ratio":     {"type": "number", "minimum": 0, "maximum": 1}
+  },
+  "additionalProperties": false
+}
