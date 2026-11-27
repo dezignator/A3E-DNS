@@ -1,0 +1,54 @@
+% latex/supplement/macros.tex
+%
+% Shared macros for the A3E-DNS supplement. Every macro is defined
+% once here and re-used throughout the supplement's chapters so that a
+% change to, for example, the DP epsilon symbol propagates everywhere.
+
+% ----- The four frameworks ------------------------------------------ %
+\newcommand{\mirage}{\textsc{Mirage-DoH}}
+\newcommand{\pafa}{\textsc{Pafa-DoH}}
+\newcommand{\eThree}{E3-DoH}
+\newcommand{\aThreeE}{A\textsuperscript{3}E-DNS}
+
+% ----- Protocols ---------------------------------------------------- %
+\newcommand{\DoH}{\textsc{DoH}}
+\newcommand{\DoT}{\textsc{DoT}}
+\newcommand{\DoQ}{\textsc{DoQ}}
+
+% ----- Cryptographic symbols ---------------------------------------- %
+\newcommand{\Qring}{\mathbb{Z}_Q}
+\newcommand{\Ndim}{N}
+\newcommand{\ntt}{\mathsf{NTT}}
+\newcommand{\intt}{\mathsf{NTT}^{-1}}
+\newcommand{\sigmas}{{\sigma_{\mathrm{s}}}}
+\newcommand{\eps}{\varepsilon}
+
+% ----- AEE state ---------------------------------------------------- %
+\newcommand{\se}{\mathfrak{se}(3)}
+\newcommand{\SE}{\mathrm{SE}(3)}
+\newcommand{\xivec}{\xi}
+\newcommand{\rhovec}{\rho}
+\newcommand{\omegavec}{\omega}
+\newcommand{\psivec}{\psi}
+\newcommand{\volatility}{v}
+
+% ----- Byzantine / FL ----------------------------------------------- %
+\newcommand{\nclients}{n}
+\newcommand{\nbyzantine}{f}
+\newcommand{\agg}{\mathsf{Agg}}
+\newcommand{\med}{\mathsf{med}}
+\newcommand{\trim}{\mathsf{trim}}
+
+% ----- Metrics ------------------------------------------------------ %
+\newcommand{\acc}{\mathsf{Acc}}
+\newcommand{\fpr}{\mathsf{FPR}}
+\newcommand{\pnn}[1]{P_{#1}}
+
+% ----- Thesis reference markers ------------------------------------- %
+\newcommand{\thesisref}[1]{\textcolor{gray}{\texttt{[#1]}}}
+\newcommand{\TBD}[1]{\textcolor{red}{TODO: #1}}
+
+% ----- Convenience -------------------------------------------------- %
+\newcommand{\eg}{e.g.}
+\newcommand{\ie}{i.e.}
+\newcommand{\etal}{\textit{et al.}}
